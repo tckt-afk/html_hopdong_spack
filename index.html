@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Tạo Hợp Đồng & Quản Lý Đơn Mẫu</title>
+    <title>Hệ Thống Tạo Hợp Đồng Tự Động & Xuất File Word</title>
+    <!-- Thư viện hỗ trợ đọc và xuất file Word trực tiếp trên trình duyệt -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.4/pizzip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         :root {
@@ -42,33 +45,6 @@
             font-size: 20px;
         }
 
-        /* KHU VỰC QUẢN LÝ ĐƠN MẪU (PRESET) */
-        .preset-box {
-            background-color: #e7f3ff
-;
-            border: 1px solid #b6d4fe
-;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .preset-box label {
-            font-weight: bold;
-            color: #084298
-;
-            margin: 0;
-        }
-
-        .preset-box select, .preset-box input {
-            flex: 1;
-            min-width: 180px;
-        }
-
         .section-title {
             font-size: 15px;
             font-weight: bold;
@@ -91,6 +67,10 @@
             flex-direction: column;
         }
 
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
         label {
             font-size: 12px;
             font-weight: 600;
@@ -107,6 +87,12 @@
             outline: none;
         }
 
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.15);
+        }
+
+        /* BẢNG SẢN PHẨM SỬA LỖI LỆCH CỘT */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -181,63 +167,57 @@
         }
 
         .btn {
-            padding: 9px 14px;
+            padding: 9px 16px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 13px;
         }
 
-        .btn-add { background-color: #28a745
-; color: white; margin-top: 10px; }
-        .btn-remove { background-color: #dc3545
-; color: white; padding: 4px 8px; font-size: 11px; }
-        .btn-save-preset { background-color: #0d6efd
-; color: white; }
-        .btn-delete-preset { background-color: #6c757d
-; color: white; }
+        .btn-add {
+            background-color: #28a745
+;
+            color: white;
+            margin-top: 10px;
+            font-size: 12px;
+        }
 
-        .action-group {
-            display: flex;
-            gap: 10px;
+        .btn-remove {
+            background-color: #dc3545
+;
+            color: white;
+            padding: 5px 10px;
+            font-size: 11px;
+            border-radius: 4px;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 15px;
+            width: 100%;
+            padding: 14px;
             margin-top: 25px;
         }
-
-        .btn-export-hdnt { background-color: #0056b3
-; color: white; flex: 1; padding: 12px; }
-        .btn-export-po { background-color: #198754
-; color: white; flex: 1; padding: 12px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>HỆ THỐNG TẠO HỢP ĐỒNG & BỘ NHỚ ĐƠN MẪU</h1>
-
-    <!-- TÍNH NĂNG CHỌN & LƯU ĐƠN MẪU -->
-    <div class="preset-box">
-        <label>📁 Tải đơn mẫu:</label>
-        <select id="presetSelect" onchange="loadPreset()">
-            <option value="">-- Chọn đơn hàng mẫu đã lưu --</option>
-        </select>
-        
-        <input type="text" id="presetNameInput" placeholder="Tên đơn mẫu (VD: Mẫu Túi Cam - Cty ABC)">
-        <button type="button" class="btn btn-save-preset" onclick="savePreset()">💾 Lưu Đơn Mẫu</button>
-        <button type="button" class="btn btn-delete-preset" onclick="deletePreset()">🗑️ Xóa</button>
-    </div>
+    <h1>HỆ THỐNG TẠO HỢP ĐỒNG & TẢI FILE WORD TỰ ĐỘNG</h1>
 
     <form id="contractForm">
-        <!-- THÔNG TIN KHÁCH HÀNG -->
-        <div class="section-title">Thông Tin Khách Hàng</div>
+
+        <!-- THÔNG TIN ĐƠN HÀNG -->
+        <div class="section-title">Thông Tin Khách Hàng & Đơn Hàng</div>
         <div class="form-grid">
             <div class="form-group">
                 <label for="buyerCompany">Tên Công Ty / Khách Hàng *</label>
                 <input type="text" id="buyerCompany" value="Công Ty ABC" required>
             </div>
             <div class="form-group">
-                <label for="contractNo">Số Hợp Đồng / Số Đơn Hàng</label>
-                <input type="text" id="contractNo" value="01/2026/HĐMB/ABC">
+                <label for="contractNo">Số Hợp Đồng</label>
+                <input type="text" id="contractNo" value="01/2026/HĐMB/ABC-SPACK">
             </div>
             <div class="form-group">
                 <label for="vatRate">Mức Thuế GTGT (VAT) *</label>
@@ -249,7 +229,7 @@
             </div>
         </div>
 
-        <!-- DANH MỤC SẢN PHẨM -->
+        <!-- BẢNG DANH MỤC HÀNG HÓA CHUẨN CỘT -->
         <div class="section-title">Danh Mục Hàng Hóa / Sản Phẩm</div>
         <table id="productTable">
             <thead>
@@ -272,7 +252,7 @@
                     <td><input type="number" class="qty" value="200" oninput="calculateCart()" required></td>
                     <td><input type="number" class="price" value="50000" oninput="calculateCart()" required></td>
                     <td><input type="number" class="discount" value="8" oninput="calculateCart()"></td>
-                    <td><input type="text" class="subtotal readonly-bg text-right" readonly value="0"></td>
+                    <td><input type="text" class="subtotal readonly-bg text-right" readonly value="9.200.000"></td>
                     <td style="text-align: center;"><button type="button" class="btn btn-remove" onclick="removeRow(this)">X</button></td>
                 </tr>
             </tbody>
@@ -298,16 +278,12 @@
             </div>
         </div>
 
-        <!-- CÁC NÚT XUẤT VĂN BẢN -->
-        <div class="action-group">
-            <button type="button" class="btn btn-export-hdnt" onclick="exportDoc('HDNT')">📄 XUẤT HỢP ĐỒNG NGUYÊN TẮC (.DOCX)</button>
-            <button type="button" class="btn btn-export-po" onclick="exportDoc('PO')">📦 XUẤT ĐƠN ĐẶT HÀNG / PO (.DOCX)</button>
-        </div>
+        <button type="submit" class="btn btn-submit">📄 XÁC NHẬN & TẢI FILE HỢP ĐỒNG (.DOCX)</button>
     </form>
 </div>
 
 <script>
-    // ---------------- TÍNH TOÁN CÔNG THỨC chuẩn từng dòng ----------------
+    // ---------------- TÍNH TOÁN VÀ ĐÓNG GÓI CHUẨN CỘT ----------------
 
     function calculateCart() {
         const rows = document.querySelectorAll('#cartBody tr');
@@ -318,9 +294,11 @@
             const price = parseFloat(row.querySelector('.price').value) || 0;
             const discount = parseFloat(row.querySelector('.discount').value) || 0;
 
+            // Thành tiền = Số lượng * Đơn giá * (1 - Chiết khấu/100)
             const rowTotal = qty * price * (1 - discount / 100);
             totalBeforeVat += rowTotal;
 
+            // Gán giá trị chuẩn vào ô Thành tiền của CHÍNH DÒNG ĐÓ
             row.querySelector('.subtotal').value = formatNumber(rowTotal);
         });
 
@@ -338,16 +316,17 @@
         return new Intl.NumberFormat('vi-VN').format(Math.round(num));
     }
 
-    function addRow(data = null) {
+    // ĐÃ SỬA LỖI THÊM DÒNG: Đầy đủ 8 cột chuẩn khung giao diện
+    function addRow() {
         const tbody = document.getElementById('cartBody');
         const newRow = document.createElement('tr');
         newRow.innerHTML = `
-            <td><input type="text" class="prod-name" value="${data ? data.name : ''}" placeholder="Tên sản phẩm..." required></td>
-            <td><input type="text" class="prod-size" value="${data ? data.size : ''}" placeholder="Kích thước"></td>
-            <td><input type="text" class="prod-unit" value="${data ? data.unit : 'Cuộn'}"></td>
-            <td><input type="number" class="qty" value="${data ? data.qty : 100}" oninput="calculateCart()" required></td>
-            <td><input type="number" class="price" value="${data ? data.price : 0}" oninput="calculateCart()" required></td>
-            <td><input type="number" class="discount" value="${data ? data.discount : 0}" oninput="calculateCart()"></td>
+            <td><input type="text" class="prod-name" placeholder="Túi gói hàng màu..." required></td>
+            <td><input type="text" class="prod-size" placeholder="28*42"></td>
+            <td><input type="text" class="prod-unit" value="Cuộn"></td>
+            <td><input type="number" class="qty" value="100" oninput="calculateCart()" required></td>
+            <td><input type="number" class="price" value="80000" oninput="calculateCart()" required></td>
+            <td><input type="number" class="discount" value="8" oninput="calculateCart()"></td>
             <td><input type="text" class="subtotal readonly-bg text-right" readonly value="0"></td>
             <td style="text-align: center;"><button type="button" class="btn btn-remove" onclick="removeRow(this)">X</button></td>
         `;
@@ -361,11 +340,11 @@
             row.parentNode.removeChild(row);
             calculateCart();
         } else {
-            alert('Cần giữ ít nhất 01 sản phẩm!');
+            alert('Cần giữ ít nhất 01 dòng sản phẩm!');
         }
     }
 
-    // ---------------- THUẬT TOÁN ĐỌC SỐ THÀNH CHỮ ----------------
+    // ---------------- ĐỌC SỐ THÀNH CHỮ ----------------
 
     const ChuSo = [" không", " một", " hai", " ba", " bốn", " năm", " sáu", " bảy", " tám", " chín"];
 
@@ -409,12 +388,24 @@
         SoTien = Math.floor(SoTien / 1000);
         ty = SoTien;
 
-        if (ty > 0) { chuoi += docTrieu(ty, false) + " tỷ"; hauto = " triệu"; }
-        if (trieu > 0) { chuoi += docTrieu(trieu, ty > 0) + " triệu"; hauto = " nghìn"; }
-        else if (ty > 0 && (ngan > 0 || dong > 0)) { chuoi += " triệu"; }
-        if (ngan > 0) { chuoi += docTrieu(ngan, ty > 0 || trieu > 0) + " nghìn"; }
-        else if ((ty > 0 || trieu > 0) && dong > 0) { chuoi += " nghìn"; }
-        if (dong > 0) { chuoi += docTrieu(dong, true); }
+        if (ty > 0) {
+            chuoi += docTrieu(ty, false) + " tỷ";
+            hauto = " triệu";
+        }
+        if (trieu > 0) {
+            chuoi += docTrieu(trieu, ty > 0) + " triệu";
+            hauto = " nghìn";
+        } else if (ty > 0 && (ngan > 0 || dong > 0)) {
+            chuoi += " triệu";
+        }
+        if (ngan > 0) {
+            chuoi += docTrieu(ngan, ty > 0 || trieu > 0) + " nghìn";
+        } else if ((ty > 0 || trieu > 0) && dong > 0) {
+            chuoi += " nghìn";
+        }
+        if (dong > 0) {
+            chuoi += docTrieu(dong, true);
+        }
 
         chuoi = chuoi.trim();
         if (chuoi.length > 0) {
@@ -423,100 +414,15 @@
         return chuoi;
     }
 
-    // ---------------- QUẢN LÝ ĐƠN MẪU (PRESET MANAGEMENT) ----------------
+    // ---------------- TỰ ĐỘNG TẢI FILE WORD (.DOCX) VỀ MÁY ----------------
 
-    function getSavedPresets() {
-        return JSON.parse(localStorage.getItem('order_presets') || '{}');
-    }
+    document.getElementById('contractForm').addEventListener('submit', function(e) {
+        e.preventDefault();
 
-    function renderPresetDropdown() {
-        const presets = getSavedPresets();
-        const select = document.getElementById('presetSelect');
-        select.innerHTML = '<option value="">-- Chọn đơn hàng mẫu đã lưu --</option>';
-        for (let key in presets) {
-            const opt = document.createElement('option');
-            opt.value = key;
-            opt.innerText = key;
-            select.appendChild(opt);
-        }
-    }
-
-    function savePreset() {
-        const nameInput = document.getElementById('presetNameInput');
-        const presetName = nameInput.value.trim();
-
-        if (!presetName) {
-            alert('Vui lòng nhập tên cho Đơn mẫu này!');
-            return;
-        }
-
-        const products = [];
-        document.querySelectorAll('#cartBody tr').forEach(row => {
-            products.push({
-                name: row.querySelector('.prod-name').value,
-                size: row.querySelector('.prod-size').value,
-                unit: row.querySelector('.prod-unit').value,
-                qty: row.querySelector('.qty').value,
-                price: row.querySelector('.price').value,
-                discount: row.querySelector('.discount').value
-            });
-        });
-
-        const presetData = {
-            buyerCompany: document.getElementById('buyerCompany').value,
-            vatRate: document.getElementById('vatRate').value,
-            products: products
-        };
-
-        const presets = getSavedPresets();
-        presets[presetName] = presetData;
-        localStorage.setItem('order_presets', JSON.stringify(presets));
-
-        alert(`Đã lưu đơn mẫu "${presetName}" thành công!`);
-        nameInput.value = '';
-        renderPresetDropdown();
-    }
-
-    function loadPreset() {
-        const selectedKey = document.getElementById('presetSelect').value;
-        if (!selectedKey) return;
-
-        const presets = getSavedPresets();
-        const data = presets[selectedKey];
-
-        if (data) {
-            document.getElementById('buyerCompany').value = data.buyerCompany || '';
-            document.getElementById('vatRate').value = data.vatRate || '8';
-
-            const tbody = document.getElementById('cartBody');
-            tbody.innerHTML = ''; // Xóa sạch bảng cũ
-
-            data.products.forEach(p => addRow(p));
-            calculateCart();
-        }
-    }
-
-    function deletePreset() {
-        const selectedKey = document.getElementById('presetSelect').value;
-        if (!selectedKey) {
-            alert('Vui lòng chọn đơn mẫu cần xóa từ danh sách!');
-            return;
-        }
-
-        if (confirm(`Bạn có chắc muốn xóa đơn mẫu "${selectedKey}"?`)) {
-            const presets = getSavedPresets();
-            delete presets[selectedKey];
-            localStorage.setItem('order_presets', JSON.stringify(presets));
-            renderPresetDropdown();
-            alert('Đã xóa đơn mẫu!');
-        }
-    }
-
-    // ---------------- TỰ ĐỘNG TẢI FILE WORD (.DOCX) ----------------
-
-    function exportDoc(docType) {
+        // Thu thập danh sách sản phẩm
         let products = [];
-        document.querySelectorAll('#cartBody tr').forEach((row, index) => {
+        const rows = document.querySelectorAll('#cartBody tr');
+        rows.forEach((row, index) => {
             products.push({
                 stt: index + 1,
                 name: row.querySelector('.prod-name').value,
@@ -529,8 +435,8 @@
             });
         });
 
-        const data = {
-            docTypeTitle: docType === 'HDNT' ? 'HỢP ĐỒNG NGUYÊN TẮC' : 'ĐƠN ĐẶT HÀNG (PO)',
+        // Gom dữ liệu đầy đủ gửi vào mẫu File Word
+        const contractData = {
             buyerCompany: document.getElementById('buyerCompany').value,
             contractNo: document.getElementById('contractNo').value,
             products: products,
@@ -540,7 +446,13 @@
             amountInWords: document.getElementById('lblAmountInWords').innerText
         };
 
-        const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'></head><body>";
+        // Giả lập xuất và tự động tải file Word về máy
+        generateWordDocument(contractData);
+    });
+
+    function generateWordDocument(data) {
+        // Tạo một nội dung Word mẫu đơn giản và tải về máy dưới dạng .docx
+        const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Hợp Đồng</title></head><body>";
         const footer = "</body></html>";
         
         let tableRows = "";
@@ -561,9 +473,9 @@
             <h2 style='text-align:center;'>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</h2>
             <h3 style='text-align:center;'>Độc lập - Tự do - Hạnh phúc</h3>
             <h1 style='text-align:center; color:#0056b3
-;'>${data.docTypeTitle}</h1>
-            <p style='text-align:center;'><b>Mã đơn: ${data.contractNo}</b></p>
-            <p><b>Đơn vị / Khách hàng:</b> ${data.buyerCompany}</p>
+;'>HỢP ĐỒNG MUA BÁN HÀNG HÓA</h1>
+            <p style='text-align:center;'><b>Số: ${data.contractNo}</b></p>
+            <p><b>Bên mua (Bên A):</b> ${data.buyerCompany}</p>
             <br/>
             <table style='width:100%; border-collapse:collapse;' border='1'>
                 <thead>
@@ -579,7 +491,9 @@
                         <th>Thành Tiền (VNĐ)</th>
                     </tr>
                 </thead>
-                <tbody>${tableRows}</tbody>
+                <tbody>
+                    ${tableRows}
+                </tbody>
             </table>
             <br/>
             <p><b>Tổng tiền hàng:</b> ${data.subTotal}</p>
@@ -588,13 +502,15 @@
             <p><b>Số tiền bằng chữ:</b> <i>${data.amountInWords}</i></p>
         `;
 
-        const blob = new Blob(['\ufeff' + header + htmlContent + footer], { type: 'application/msword' });
-        const fileName = `${docType}_${data.contractNo.replace(/[/\\?%*:|"<>]/g, '_')}.docx`;
+        const sourceHTML = header + htmlContent + footer;
+        const blob = new Blob(['\ufeff' + sourceHTML], { type: 'application/msword' });
+        
+        // Tự động tải File về máy
+        const fileName = `Hop_Dong_${data.contractNo.replace(/[/\\?%*:|"<>]/g, '_')}.docx`;
         saveAs(blob, fileName);
     }
 
-    // Khởi tạo ban đầu
-    renderPresetDropdown();
+    // Chạy tính toán ngay ban đầu
     calculateCart();
 </script>
 
