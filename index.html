@@ -1,518 +1,478 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Tạo Hợp Đồng Tự Động & Xuất File Word</title>
-    <!-- Thư viện hỗ trợ đọc và xuất file Word trực tiếp trên trình duyệt -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.4/pizzip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <style>
-        :root {
-            --primary-color: #0056b3
-;
-            --bg-color: #f4f6f9
-;
-            --card-bg: #ffffff
-;
-            --border-color: #ced4da
-;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-
-        .container {
-            max-width: 950px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-
-        h1 {
-            text-align: center;
-            color: var(--primary-color);
-            margin-bottom: 25px;
-            text-transform: uppercase;
-            font-size: 20px;
-        }
-
-        .section-title {
-            font-size: 15px;
-            font-weight: bold;
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 5px;
-            margin-top: 20px;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 15px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-
-        label {
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: #495057
-;
-        }
-
-        input, select {
-            padding: 9px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 13px;
-            outline: none;
-        }
-
-        input:focus, select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.15);
-        }
-
-        /* BẢNG SẢN PHẨM SỬA LỖI LỆCH CỘT */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th, td {
-            border: 1px solid var(--border-color);
-            padding: 8px;
-            text-align: left;
-            vertical-align: middle;
-        }
-
-        th {
-            background-color: #f8f9fa
-;
-            font-size: 12px;
-        }
-
-        td input {
-            width: 100%;
-            box-sizing: border-box;
-            border: none;
-            padding: 4px;
-            background: transparent;
-        }
-
-        .text-right {
-            text-align: right;
-            font-weight: bold;
-        }
-
-        .readonly-bg {
-            background-color: #e9ecef
- !important;
-            font-weight: bold;
-        }
-
-        .summary-box {
-            background-color: #fff8dd
-;
-            border: 1px solid #ffe69c
-;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-
-        .summary-line {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .summary-line.total {
-            font-size: 16px;
-            font-weight: bold;
-            color: #d9534f
-;
-            border-top: 1px solid #e0e0e0
-;
-            padding-top: 8px;
-        }
-
-        .words-line {
-            margin-top: 10px;
-            font-style: italic;
-            font-weight: bold;
-            color: #0056b3
-;
-        }
-
-        .btn {
-            padding: 9px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .btn-add {
-            background-color: #28a745
-;
-            color: white;
-            margin-top: 10px;
-            font-size: 12px;
-        }
-
-        .btn-remove {
-            background-color: #dc3545
-;
-            color: white;
-            padding: 5px 10px;
-            font-size: 11px;
-            border-radius: 4px;
-        }
-
-        .btn-submit {
-            background-color: var(--primary-color);
-            color: white;
-            font-size: 15px;
-            width: 100%;
-            padding: 14px;
-            margin-top: 25px;
-        }
+ <head><script>window["__codeletBootstrap__"]=JSON.parse('{"A":"A","B":"20260817-05-91af805","C":{"Abril Fatface":"YACgEZbkUVE,0","Alfa Slab One":"YACgEYS9sJU,0","Anton":"YACgEcYqQ-A,0","Archivo":"YAHO2-t-jNE,0","Arial":"YAGyDvJ_4Ts,0","Bebas Neue":"YACgESME5ew,0","Bricolage Grotesque":"YAFyMcdwzpc,0","Canva Sans":"YAFLd8sKbwc,2","Caveat":"YALBs2ploWQ,0","Comic Sans MS":"YAHO2VMiyZo,0","Cormorant Garamond":"YAFdJhX-538,0","Courier New":"YAGzXiGs0_8,0","DM Sans":"YAD1aU3sLnI,0","DM Serif Display":"YAD1aYG82rc,0","Forum":"YACgEcnnqB4,0","Fraunces":"YAEul-FRQw4,0","Georgia":"YAGzXkO0pEM,0","Helvetica Neue":"YAFcf6CtJfI,0","Impact":"YAFcfnjI7Vk,0","Inter":"YAFdJvSyp_k,3","Iowan Old Style":"YAGNIFa8j9o,0","Jacques Francois":"YAHO2a5g66Q,0","JetBrains Mono":"YAFdJksXcAk,0","Libre Baskerville":"YACgEUFdPdA,0","Manrope":"YAHO2b2feC4,0","Merriweather":"YACgEXvHxxs,0","Montserrat":"YADLjI9qxTA,0","Nunito":"YACgEX8C5Gg,0","Oleo Script":"YACgEQQ14jI,0","Phantom Sans":"YAHO2E8Pb88,0","Playfair Display":"YACgEYmuCJE,0","Poppins":"YAFdJjbTu24,1","Press Start 2P":"YAFyGr-8pmQ,0","Quicksand":"YADWjpfPmdk,0","Raleway":"YACgEVg3xZg,0","Segoe UI":"YAHNdRD1Klw,0","Source Sans 3":"YAG4lO1Mj10,0","Spectral":"YAHO2rVUHIM,0","Times New Roman":"YAGzXW3gftg,0","Times":"YAGzXW3gftg,0","Ubuntu":"YACgERDU--Q,0","Work Sans":"YAGXhLOKv44,0","Yellowtail":"YACgEYG4kG4,0","ui-monospace":"YADlN8CFZ8Q,0","ui-sans-serif":"YACkoN-xg4g,0"}}');</script><script src="/_sdk/7949ff62d67710d5.telemetry_sdk.js" integrity="sha512-KIvXA82Di44YY/RH9/63A9MuTuavYgDFG8PfErJn7Wli4K0LAOk+coo/aPXk3+ZNL96nHh9VYD4PE+fLes+laQ=="></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tạo Thông Tin Hợp Đồng</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script src="/_sdk/0e8d3a91e1c6f495.data_sdk.js" integrity="sha512-c00oDoGjsMgluCLLEyVl3suwEkgjOGGplVFbsilUoBg4aMKNmsL3mwsc9r0dPn95qiSZyjBousQXgROkAW7p/w=="></script>
+  <script src="/_sdk/a051f9537983733d.editing_sdk.js" integrity="sha512-IWn3eBHnVt7zQ0Rp79J72qSgJoLbskCA9lcfY4retf+5km4LjuhSHpvx+182KCHmEZ6EbJtWqVsybpV8Sd8PQQ=="></script>
+  <style>
+        body { font-family: 'Work Sans', sans-serif; }
+        .radio-card { transition: all 0.2s; }
+        .radio-card:has(input:checked) { border-color: #0056b3; background: #eef5ff; }
+        .cfield { display: none !important; }
+        .cfield.visible { display: flex !important; }
+        .cfield-block.visible { display: block !important; }
+        .cfield-block { display: none !important; }
+        .toast { transform: translateY(-100%); opacity: 0; transition: all 0.3s; position: fixed; top: 1rem; left: 50%; transform: translateX(-50%) translateY(-100%); z-index: 50; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     </style>
-</head>
-<body>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  <script src="/_sdk/eba18683f23e5798.resizing_sdk.js" type="text/javascript" integrity="sha512-E0UWUllhwPXaNJtjyTKXWKrIE+FruPfFpO4mRmMDP2LI+U9bOizy5npCq6xx/JyWcvSK7D3TFf2wFR2Mha9kbA=="></script>
+ </head>
+ <body data-template-id="__page-root" class="min-h-screen p-4 md:p-8">
+  <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
+   <h1 data-template-id="page-title" class="canva-text text-center font-bold text-xl md:text-2xl uppercase mb-6"></h1>
+   <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex flex-wrap items-center gap-3">
+    <label for="presetSelect" class="text-sm font-bold text-blue-900 whitespace-nowrap">📁 Tải đơn mẫu:</label> <select id="presetSelect" class="flex-1 min-w-[200px] p-2 border border-gray-300 rounded-md text-sm"><option value="">-- Chọn đơn hàng mẫu đã lưu --</option></select> <input type="text" id="presetNameInput" placeholder="Tên đơn mẫu (VD: Mẫu Túi Cam - Cty ABC)" class="flex-1 min-w-[220px] p-2 border border-gray-300 rounded-md text-sm"> <button type="button" id="btnSavePreset" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-bold">💾 Lưu Đơn Mẫu</button> <button type="button" id="btnDeletePreset" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-md text-sm font-bold">🗑️ Xóa</button>
+   </div>
+   <div id="toast" class="toast bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg font-medium">
+    Dữ liệu đã được lưu thành công!
+   </div>
+   <form id="contractForm"><!-- MỤC 1 -->
+    <div data-template-id="company-section" class="canva-section rounded-xl p-5 mb-6 text-center border-2 border-blue-200">
+     <h2 data-template-id="company-title" class="canva-text font-bold mb-4"></h2>
+     <div class="flex flex-wrap justify-center gap-4"><label class="radio-card bg-white px-5 py-3 rounded-lg border-2 border-gray-300 cursor-pointer font-semibold flex items-center gap-2"> <input type="radio" name="company" value="SPACK" checked class="scale-125"> CÔNG TY S-PACK </label> <label class="radio-card bg-white px-5 py-3 rounded-lg border-2 border-gray-300 cursor-pointer font-semibold flex items-center gap-2"> <input type="radio" name="company" value="SWIFT" class="scale-125"> CÔNG TY SWIFT PACK </label>
+     </div>
+    </div><!-- MỤC 2 -->
+    <h3 data-template-id="section2-title" class="canva-text font-bold uppercase border-b-2 border-blue-700 pb-1 mb-4 mt-6"></h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+     <div class="flex flex-col"><label for="documentType" class="text-sm font-semibold text-gray-600 mb-1">Mẫu văn bản cần tạo *</label> <select id="documentType" name="documentType" required class="p-2.5 border border-gray-300 rounded-md font-semibold text-blue-800 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"> <option value="HDNT">Mẫu 01: Hợp đồng Nguyên Tắc 2026</option> <option value="HDMB">Mẫu 02: Hợp đồng Mua Bán Từng Đợt 2026</option> <option value="DDH">Mẫu 03: Đơn Đặt Hàng Độc Lập</option> <option value="BBBG">Mẫu 04: Biên Bản Bàn Giao Hàng Hóa</option> <option value="BBCC">Mẫu 05: Biên Bản Cam Kết (Thuế BVMT)</option> </select>
+     </div>
+     <div class="flex flex-col"><label for="partnerShortName" class="text-sm font-semibold text-gray-600 mb-1">Tên ngắn đối tác (VD: Tiki) *</label> <input type="text" id="partnerShortName" name="partnerShortName" placeholder="VD: ABC" required class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col"><label for="contractNo" class="text-sm font-semibold text-gray-600 mb-1">Số Văn Bản / Hợp Đồng</label> <input type="text" id="contractNo" name="contractNo" readonly class="p-2.5 border border-gray-300 rounded-md bg-gray-100">
+     </div>
+     <div class="flex flex-col"><label for="createdDate" class="text-sm font-semibold text-gray-600 mb-1">Ngày lập văn bản *</label> <input type="date" id="createdDate" name="createdDate" required class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-ref md:col-span-2"><label for="refContractNo" class="text-sm font-semibold text-gray-600 mb-1">Căn cứ theo HĐ / Đơn hàng số (nếu có)</label> <input type="text" id="refContractNo" name="refContractNo" placeholder="VD: 01/2026/HĐNT..." class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+    </div><!-- MỤC 3 -->
+    <h3 data-template-id="section3-title" class="canva-text font-bold uppercase border-b-2 border-blue-700 pb-1 mb-4 mt-6"></h3><!-- Saved company selector -->
+    <div class="bg-gray-100 border border-dashed border-gray-400 rounded-lg p-3 mb-4 flex flex-wrap items-center gap-3"><label for="savedCompanies" class="text-sm font-bold text-gray-600 whitespace-nowrap">Chọn nhanh công ty đã lưu:</label> <select id="savedCompanies" class="flex-grow p-2 border border-gray-300 rounded-md font-semibold text-sm"> <option value="">-- Chọn công ty đã lưu --</option> </select> <button type="button" id="btnDeleteCompany" class="bg-gray-500 text-white px-3 py-2 rounded-md text-xs font-bold hover:bg-gray-600">Xóa</button>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+     <div class="flex flex-col md:col-span-2"><label for="buyerCompany" class="text-sm font-semibold text-gray-600 mb-1">Tên Công Ty Đầy Đủ *</label> <input type="text" id="buyerCompany" name="buyerCompany" required class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-legal"><label for="buyerRep" class="text-sm font-semibold text-gray-600 mb-1">Người Đại Diện *</label> <input type="text" id="buyerRep" name="buyerRep" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-legal"><label for="buyerRole" class="text-sm font-semibold text-gray-600 mb-1">Chức Vụ *</label> <input type="text" id="buyerRole" name="buyerRole" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col md:col-span-2"><label for="buyerAddress" class="text-sm font-semibold text-gray-600 mb-1">Địa Chỉ ĐKKD / Kho *</label> <input type="text" id="buyerAddress" name="buyerAddress" required class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col"><label for="buyerTaxCode" class="text-sm font-semibold text-gray-600 mb-1">Mã Số Thuế *</label> <input type="text" id="buyerTaxCode" name="buyerTaxCode" required class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-bank"><label for="buyerPhone" class="text-sm font-semibold text-gray-600 mb-1">Số Điện Thoại</label> <input type="tel" id="buyerPhone" name="buyerPhone" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-bank"><label for="buyerAccount" class="text-sm font-semibold text-gray-600 mb-1">Số Tài Khoản Ngân Hàng</label> <input type="text" id="buyerAccount" name="buyerAccount" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-bank"><label for="buyerBank" class="text-sm font-semibold text-gray-600 mb-1">Mở Tại Ngân Hàng</label> <input type="text" id="buyerBank" name="buyerBank" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+    </div><button type="button" id="btnSaveCompany" data-template-id="save-company-btn" class="canva-button mt-3 px-4 py-2 rounded-md text-white font-semibold text-sm"></button> <!-- MỤC 4 -->
+    <h3 data-template-id="section4-title" class="canva-text font-bold uppercase border-b-2 border-blue-700 pb-1 mb-4 mt-6"></h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+     <div class="flex flex-col cfield field-m01 md:col-span-2"><label for="annualVolume" class="text-sm font-semibold text-gray-600 mb-1">Sản lượng dự kiến 01 năm *</label> <input type="text" id="annualVolume" name="annualVolume" placeholder="VD: 20.000 cuộn tương đương 22.400kg" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-m01 md:col-span-2"><label for="commitType" class="text-sm font-semibold text-gray-600 mb-1">Phương thức Cam kết Thuế BVMT *</label> <select id="commitType" name="commitType" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100"> <option value="TH1">TH1: Ký 1 biên bản cam kết cho dự kiến cả năm</option> <option value="TH2">TH2: Ký biên bản cam kết riêng cho từng đơn hàng</option> </select>
+     </div>
+     <div class="flex flex-col cfield field-m05 md:col-span-2"><label for="camKetBagQty" class="text-sm font-semibold text-gray-600 mb-1">Cam kết số lượng túi (Không chịu thuế BVMT) *</label> <input type="text" id="camKetBagQty" name="camKetBagQty" placeholder="VD: 10.000 cuộn (tương đương 11.200 kg)" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-payment"><label for="printType" class="text-sm font-semibold text-gray-600 mb-1">Hình thức In ấn *</label> <select id="printType" name="printType" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100"> <option value="no_print">Không in (TT 100% trước xuất kho)</option> <option value="printed">In Công Nghiệp (Cọc 80%)</option> </select>
+     </div>
+     <div class="flex flex-col cfield field-payment"><label for="vatRate" class="text-sm font-semibold text-gray-600 mb-1">Thuế VAT *</label> <select id="vatRate" name="vatRate" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100"> <option value="8">8%</option> <option value="10">10%</option> <option value="0">0%</option> </select>
+     </div>
+     <div class="flex flex-col cfield field-deposit"><label for="depositPercent" class="text-sm font-semibold text-gray-600 mb-1">Tỷ lệ đặt cọc Lần 1</label> <input type="text" id="depositPercent" name="depositPercent" placeholder="VD: 80% giá trị HĐ" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-delivery md:col-span-2"><label for="deliveryAddress" class="text-sm font-semibold text-gray-600 mb-1">Địa điểm giao hàng *</label> <input type="text" id="deliveryAddress" name="deliveryAddress" placeholder="Kho Bên A tại..." class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-delivery"><label for="deliveryDate" class="text-sm font-semibold text-gray-600 mb-1">Thời hạn giao hàng *</label> <input type="text" id="deliveryDate" name="deliveryDate" placeholder="VD: Trong vòng 30 ngày" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+    </div><!-- Bảng sản phẩm -->
+    <div class="cfield-block field-table mt-4">
+     <h3 data-template-id="section-products-title" class="canva-text font-bold uppercase border-b-2 border-blue-700 pb-1 mb-4"></h3>
+     <div class="overflow-x-auto">
+      <table class="w-full border-collapse text-sm" id="productTable">
+       <thead>
+        <tr class="bg-gray-50">
+         <th class="border border-gray-300 p-2 text-left">Tên hàng hóa / Quy cách</th>
+         <th class="border border-gray-300 p-2 w-24">Kích thước</th>
+         <th class="border border-gray-300 p-2 w-16">ĐVT</th>
+         <th class="border border-gray-300 p-2 w-20">Số lượng</th>
+         <th class="border border-gray-300 p-2 w-28 col-price">Đơn giá (VNĐ)</th>
+         <th class="border border-gray-300 p-2 w-16 col-price">CK(%)</th>
+         <th class="border border-gray-300 p-2 w-32 col-price">Thành tiền (VNĐ)</th>
+         <th class="border border-gray-300 p-2 w-12">Xóa</th>
+        </tr>
+       </thead>
+       <tbody id="productBody">
+        <tr>
+         <td class="border border-gray-300 p-1"><input type="text" name="prodName[]" placeholder="Túi/Màng gói hàng..." required class="w-full p-1.5 border-0 focus:ring-0"></td>
+         <td class="border border-gray-300 p-1"><input type="text" name="prodSize[]" placeholder="28*42" class="w-full p-1.5 border-0 focus:ring-0"></td>
+         <td class="border border-gray-300 p-1"><input type="text" name="prodUnit[]" value="Cuộn" class="w-full p-1.5 border-0 focus:ring-0"></td>
+         <td class="border border-gray-300 p-1"><input type="number" name="prodQty[]" required class="w-full p-1.5 border-0 focus:ring-0"></td>
+         <td class="border border-gray-300 p-1 col-price"><input type="number" name="prodPrice[]" class="w-full p-1.5 border-0 focus:ring-0"></td>
+         <td class="border border-gray-300 p-1 col-price"><input type="number" name="prodDiscount[]" value="0" class="w-full p-1.5 border-0 focus:ring-0"></td>
+         <td class="border border-gray-300 p-1 col-price"><input type="text" name="prodSubtotal[]" readonly value="0" class="w-full p-1.5 border-0 bg-gray-100 text-right font-semibold"></td>
+         <td class="border border-gray-300 p-1 text-center"><button type="button" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-bold" onclick="removeRow(this)">X</button></td>
+        </tr>
+       </tbody>
+      </table>
+     </div><button type="button" data-template-id="add-product-btn" class="canva-button mt-3 px-4 py-2 rounded-md text-white font-semibold text-sm" onclick="addRow()"></button>
+     <div class="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4 space-y-2 text-sm">
+      <div class="flex justify-between"><span>Tổng tiền hàng (chưa VAT):</span><strong id="lblSubTotal">0 VNĐ</strong>
+      </div>
+      <div class="flex justify-between"><span>Thuế GTGT (VAT):</span><strong id="lblVatTotal">0 VNĐ</strong>
+      </div>
+      <div class="flex justify-between border-t border-yellow-200 pt-2 text-base text-red-600"><span>TỔNG THANH TOÁN:</span><strong id="lblGrandTotal">0 VNĐ</strong>
+      </div>
+      <div class="pt-2 italic font-semibold text-blue-700">
+       Số tiền bằng chữ: <span id="lblAmountInWords">Không đồng./.</span>
+      </div>
+     </div>
+    </div>
+    <div class="flex flex-col md:flex-row gap-3 mt-8"><button type="button" id="exportWordBtn" data-template-id="export-word-btn" class="canva-button flex-1 py-4 rounded-lg text-white font-bold text-lg uppercase"></button> <button type="button" id="exportPoBtn" data-template-id="export-po-btn" class="canva-button flex-1 py-4 rounded-lg text-white font-bold text-lg uppercase"></button> <button type="submit" id="submitBtn" data-template-id="submit-btn" class="canva-button flex-1 py-4 rounded-lg text-white font-bold text-lg uppercase"></button>
+    </div>
+   </form>
+  </div>
+  <script>
+    document.getElementById('createdDate').valueAsDate = new Date();
 
-<div class="container">
-    <h1>HỆ THỐNG TẠO HỢP ĐỒNG & TẢI FILE WORD TỰ ĐỘNG</h1>
+    // --- Contract number generation ---
+    function generateContractNo() {
+        const company = document.querySelector('input[name="company"]:checked').value;
+        const docType = document.getElementById('documentType').value;
+        const partner = document.getElementById('partnerShortName').value.toUpperCase() || '[ĐỐI-TÁC]';
+        const year = new Date().getFullYear();
+        let code = '';
+        if (docType === 'HDNT') code = `05/${year}/HĐNT/${partner}-${company}`;
+        else if (docType === 'HDMB') code = `01/${year}/HĐMB/${partner}-${company}`;
+        else if (docType === 'DDH') code = `01/${partner}-${company}`;
+        else if (docType === 'BBBG') code = `BBBG/${partner}-${company}`;
+        else if (docType === 'BBCC') code = `BBCC/${partner}-${company}`;
+        document.getElementById('contractNo').value = code;
+    }
 
-    <form id="contractForm">
+    // --- Dynamic field visibility ---
+    const fieldRules = {
+        HDNT: ['field-legal','field-bank','field-ref','field-m01','field-payment','field-delivery','field-table'],
+        HDMB: ['field-legal','field-bank','field-ref','field-deposit','field-payment','field-delivery','field-table'],
+        DDH:  ['field-payment','field-delivery','field-table'],
+        BBBG: ['field-ref','field-delivery','field-table'],
+        BBCC: ['field-legal','field-m05','field-ref']
+    };
 
-        <!-- THÔNG TIN ĐƠN HÀNG -->
-        <div class="section-title">Thông Tin Khách Hàng & Đơn Hàng</div>
-        <div class="form-grid">
-            <div class="form-group">
-                <label for="buyerCompany">Tên Công Ty / Khách Hàng *</label>
-                <input type="text" id="buyerCompany" value="Công Ty ABC" required>
-            </div>
-            <div class="form-group">
-                <label for="contractNo">Số Hợp Đồng</label>
-                <input type="text" id="contractNo" value="01/2026/HĐMB/ABC-SPACK">
-            </div>
-            <div class="form-group">
-                <label for="vatRate">Mức Thuế GTGT (VAT) *</label>
-                <select id="vatRate" onchange="calculateCart()">
-                    <option value="8">8%</option>
-                    <option value="10">10%</option>
-                    <option value="0">0%</option>
-                </select>
-            </div>
-        </div>
+    function handleFormChange() {
+        generateContractNo();
+        const docType = document.getElementById('documentType').value;
+        const visibleClasses = fieldRules[docType] || [];
 
-        <!-- BẢNG DANH MỤC HÀNG HÓA CHUẨN CỘT -->
-        <div class="section-title">Danh Mục Hàng Hóa / Sản Phẩm</div>
-        <table id="productTable">
-            <thead>
-                <tr>
-                    <th>Tên hàng hóa / Quy cách</th>
-                    <th width="12%">Kích thước</th>
-                    <th width="8%">ĐVT</th>
-                    <th width="10%">Số lượng</th>
-                    <th width="14%">Đơn giá (VNĐ)</th>
-                    <th width="8%">CK(%)</th>
-                    <th width="16%">Thành tiền (VNĐ)</th>
-                    <th width="5%">Xóa</th>
-                </tr>
-            </thead>
-            <tbody id="cartBody">
-                <tr>
-                    <td><input type="text" class="prod-name" value="Túi gói hàng màu cam" required></td>
-                    <td><input type="text" class="prod-size" value="28*42"></td>
-                    <td><input type="text" class="prod-unit" value="Cuộn"></td>
-                    <td><input type="number" class="qty" value="200" oninput="calculateCart()" required></td>
-                    <td><input type="number" class="price" value="50000" oninput="calculateCart()" required></td>
-                    <td><input type="number" class="discount" value="8" oninput="calculateCart()"></td>
-                    <td><input type="text" class="subtotal readonly-bg text-right" readonly value="9.200.000"></td>
-                    <td style="text-align: center;"><button type="button" class="btn btn-remove" onclick="removeRow(this)">X</button></td>
-                </tr>
-            </tbody>
-        </table>
-        <button type="button" class="btn btn-add" onclick="addRow()">+ Thêm Sản Phẩm</button>
+        // Hide all conditional fields
+        document.querySelectorAll('.cfield, .cfield-block').forEach(el => el.classList.remove('visible'));
 
-        <!-- BẢNG TỔNG TIỀN & ĐỌC SỐ CHỮ -->
-        <div class="summary-box">
-            <div class="summary-line">
-                <span>Tổng tiền hàng (chưa VAT):</span>
-                <span id="lblSubTotal" class="text-right">0 VNĐ</span>
-            </div>
-            <div class="summary-line">
-                <span>Thuế GTGT (VAT):</span>
-                <span id="lblVatTotal" class="text-right">0 VNĐ</span>
-            </div>
-            <div class="summary-line total">
-                <span>TỔNG THANH TOÁN (TẠM TÍNH):</span>
-                <span id="lblGrandTotal" class="text-right">0 VNĐ</span>
-            </div>
-            <div class="words-line">
-                Số tiền bằng chữ: <span id="lblAmountInWords">Không đồng./.</span>
-            </div>
-        </div>
-
-        <button type="submit" class="btn btn-submit">📄 XÁC NHẬN & TẢI FILE HỢP ĐỒNG (.DOCX)</button>
-    </form>
-</div>
-
-<script>
-    // ---------------- TÍNH TOÁN VÀ ĐÓNG GÓI CHUẨN CỘT ----------------
-
-    function calculateCart() {
-        const rows = document.querySelectorAll('#cartBody tr');
-        let totalBeforeVat = 0;
-
-        rows.forEach(row => {
-            const qty = parseFloat(row.querySelector('.qty').value) || 0;
-            const price = parseFloat(row.querySelector('.price').value) || 0;
-            const discount = parseFloat(row.querySelector('.discount').value) || 0;
-
-            // Thành tiền = Số lượng * Đơn giá * (1 - Chiết khấu/100)
-            const rowTotal = qty * price * (1 - discount / 100);
-            totalBeforeVat += rowTotal;
-
-            // Gán giá trị chuẩn vào ô Thành tiền của CHÍNH DÒNG ĐÓ
-            row.querySelector('.subtotal').value = formatNumber(rowTotal);
+        // Show relevant ones
+        visibleClasses.forEach(cls => {
+            document.querySelectorAll('.' + cls).forEach(el => el.classList.add('visible'));
         });
 
-        const vatRate = parseFloat(document.getElementById('vatRate').value) || 0;
-        const vatAmount = totalBeforeVat * (vatRate / 100);
-        const grandTotal = Math.round(totalBeforeVat + vatAmount);
+        // Toggle required on legal fields
+        const needsLegal = ['HDNT','HDMB','BBCC'].includes(docType);
+        document.getElementById('buyerRep').toggleAttribute('required', needsLegal);
+        document.getElementById('buyerRole').toggleAttribute('required', needsLegal);
 
-        document.getElementById('lblSubTotal').innerText = formatNumber(totalBeforeVat) + " VNĐ";
-        document.getElementById('lblVatTotal').innerText = formatNumber(vatAmount) + " VNĐ";
-        document.getElementById('lblGrandTotal').innerText = formatNumber(grandTotal) + " VNĐ";
-        document.getElementById('lblAmountInWords').innerText = docSoTiengViet(grandTotal) + "./.";
+        // Hide price columns for BBBG
+        document.querySelectorAll('.col-price').forEach(el => {
+            el.style.display = docType === 'BBBG' ? 'none' : '';
+        });
     }
 
-    function formatNumber(num) {
-        return new Intl.NumberFormat('vi-VN').format(Math.round(num));
-    }
+    document.getElementById('documentType').addEventListener('change', handleFormChange);
+    document.getElementById('partnerShortName').addEventListener('input', generateContractNo);
+    document.querySelectorAll('input[name="company"]').forEach(r => r.addEventListener('change', handleFormChange));
 
-    // ĐÃ SỬA LỖI THÊM DÒNG: Đầy đủ 8 cột chuẩn khung giao diện
-    function addRow() {
-        const tbody = document.getElementById('cartBody');
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td><input type="text" class="prod-name" placeholder="Túi gói hàng màu..." required></td>
-            <td><input type="text" class="prod-size" placeholder="28*42"></td>
-            <td><input type="text" class="prod-unit" value="Cuộn"></td>
-            <td><input type="number" class="qty" value="100" oninput="calculateCart()" required></td>
-            <td><input type="number" class="price" value="80000" oninput="calculateCart()" required></td>
-            <td><input type="number" class="discount" value="8" oninput="calculateCart()"></td>
-            <td><input type="text" class="subtotal readonly-bg text-right" readonly value="0"></td>
-            <td style="text-align: center;"><button type="button" class="btn btn-remove" onclick="removeRow(this)">X</button></td>
-        `;
-        tbody.appendChild(newRow);
-        calculateCart();
+    // --- Automatic totals and Vietnamese number words ---
+    function formatMoney(value) { return new Intl.NumberFormat('vi-VN').format(Math.round(value)); }
+    const numberWords = ['không','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
+    function readThreeDigits(n, full) {
+        const h = Math.floor(n / 100), t = Math.floor((n % 100) / 10), u = n % 10; let s = '';
+        if (full || h) { s += numberWords[h] + ' trăm'; if (!t && u) s += ' lẻ'; }
+        if (t > 1) s += ' ' + numberWords[t] + ' mươi'; else if (t === 1) s += ' mười';
+        if (u) s += (t > 1 && u === 1 ? ' mốt' : t > 0 && u === 5 ? ' lăm' : ' ' + numberWords[u]);
+        return s;
+    }
+    function docSoTiengViet(value) {
+        value = Math.round(value); if (!value) return 'Không đồng';
+        const units = ['', ' nghìn', ' triệu', ' tỷ']; let n = value, parts = [], i = 0;
+        while (n > 0) { const block = n % 1000; if (block) parts.unshift(readThreeDigits(block, n >= 1000) + units[i]); n = Math.floor(n / 1000); i++; }
+        return parts.join(' ').replace(/^./, c => c.toUpperCase()) + ' đồng chẵn';
+    }
+    function calculateTotals() {
+        let subtotal = 0;
+        document.querySelectorAll('#productBody tr').forEach(row => {
+            const qty = parseFloat(row.querySelector('[name="prodQty[]"]').value) || 0;
+            const price = parseFloat(row.querySelector('[name="prodPrice[]"]').value) || 0;
+            const discount = parseFloat(row.querySelector('[name="prodDiscount[]"]').value) || 0;
+            const amount = qty * price * (1 - discount / 100); subtotal += amount;
+            const output = row.querySelector('[name="prodSubtotal[]"]'); if (output) output.value = formatMoney(amount);
+        });
+        const vat = subtotal * ((parseFloat(document.getElementById('vatRate').value) || 0) / 100);
+        const grand = Math.round(subtotal + vat);
+        document.getElementById('lblSubTotal').textContent = formatMoney(subtotal) + ' VNĐ';
+        document.getElementById('lblVatTotal').textContent = formatMoney(vat) + ' VNĐ';
+        document.getElementById('lblGrandTotal').textContent = formatMoney(grand) + ' VNĐ';
+        document.getElementById('lblAmountInWords').textContent = docSoTiengViet(grand) + './.';
+        return { subtotal: Math.round(subtotal), vat: Math.round(vat), grand, words: docSoTiengViet(grand) + './.' };
+    }
+    document.getElementById('productBody').addEventListener('input', calculateTotals);
+    document.getElementById('vatRate').addEventListener('change', calculateTotals);
+
+    // --- Product table ---
+    function addRow(product = {}) {
+        const docType = document.getElementById('documentType').value;
+        const hidePrice = docType === 'BBBG' ? 'style="display:none"' : '';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="border border-gray-300 p-1"><input type="text" name="prodName[]" placeholder="Túi/Màng gói hàng..." required class="w-full p-1.5 border-0 focus:ring-0"></td>
+            <td class="border border-gray-300 p-1"><input type="text" name="prodSize[]" placeholder="28*42" class="w-full p-1.5 border-0 focus:ring-0"></td>
+            <td class="border border-gray-300 p-1"><input type="text" name="prodUnit[]" value="Cuộn" class="w-full p-1.5 border-0 focus:ring-0"></td>
+            <td class="border border-gray-300 p-1"><input type="number" name="prodQty[]" required class="w-full p-1.5 border-0 focus:ring-0"></td>
+            <td class="border border-gray-300 p-1 col-price" ${hidePrice}><input type="number" name="prodPrice[]" class="w-full p-1.5 border-0 focus:ring-0"></td>
+            <td class="border border-gray-300 p-1 col-price" ${hidePrice}><input type="number" name="prodDiscount[]" value="0" class="w-full p-1.5 border-0 focus:ring-0"></td>
+            <td class="border border-gray-300 p-1 col-price" ${hidePrice}><input type="text" name="prodSubtotal[]" readonly value="0" class="w-full p-1.5 border-0 bg-gray-100 text-right font-semibold"></td>
+            <td class="border border-gray-300 p-1 text-center"><button type="button" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-bold" onclick="removeRow(this)">X</button></td>`;
+        document.getElementById('productBody').appendChild(tr);
+        const fields = { prodName: product.name, prodSize: product.size, prodUnit: product.unit, prodQty: product.qty, prodPrice: product.price, prodDiscount: product.discount };
+        Object.entries(fields).forEach(([name, value]) => {
+            if (value !== undefined) tr.querySelector(`[name="${name}[]"]`).value = value;
+        });
+        calculateTotals();
     }
 
     function removeRow(btn) {
-        const row = btn.parentNode.parentNode;
-        if (document.querySelectorAll('#cartBody tr').length > 1) {
-            row.parentNode.removeChild(row);
-            calculateCart();
-        } else {
-            alert('Cần giữ ít nhất 01 dòng sản phẩm!');
+        if (document.querySelectorAll('#productBody tr').length > 1) btn.closest('tr').remove();
+    }
+
+    // --- Saved companies (localStorage) ---
+    function refreshCompanyDropdown() {
+        const dd = document.getElementById('savedCompanies');
+        dd.innerHTML = '<option value="">-- Chọn công ty đã lưu --</option>';
+        const companies = JSON.parse(localStorage.getItem('saved_companies') || '{}');
+        for (let key in companies) {
+            const opt = document.createElement('option');
+            opt.value = key;
+            opt.textContent = key;
+            dd.appendChild(opt);
         }
     }
 
-    // ---------------- ĐỌC SỐ THÀNH CHỮ ----------------
-
-    const ChuSo = [" không", " một", " hai", " ba", " bốn", " năm", " sáu", " bảy", " tám", " chín"];
-
-    function docTrieu(so, hayDoc) {
-        let chu = "";
-        const trambao = Math.floor(so / 100);
-        const chpbao = Math.floor((so % 100) / 10);
-        const donvi = so % 10;
-
-        if (hayDoc || trambao > 0) {
-            chu += ChuSo[trambao] + " trăm";
-            if (chpbao === 0 && donvi > 0) chu += " lẻ";
-        }
-        if (chpbao > 1) {
-            chu += ChuSo[chpbao] + " mươi";
-            if (chpbao !== 0 && donvi === 5) chu += " lăm";
-        } else if (chpbao === 1) {
-            chu += " mười";
-            if (donvi === 5) chu += " lăm";
-        }
-        if (chpbao !== 1 && chpbao !== 0 && donvi === 1) {
-            chu += " mốt";
-        } else if (donvi > 0 && !(chpbao > 0 && donvi === 5)) {
-            chu += ChuSo[donvi];
-        }
-        return chu;
-    }
-
-    function docSoTiengViet(SoTien) {
-        if (SoTien === 0) return "Không đồng";
-        if (SoTien < 0) return "Số tiền âm";
-
-        let chuoi = "", hauto = "";
-        let ty = 0, trieu = 0, ngan = 0, dong = 0;
-
-        dong = SoTien % 1000;
-        SoTien = Math.floor(SoTien / 1000);
-        ngan = SoTien % 1000;
-        SoTien = Math.floor(SoTien / 1000);
-        trieu = SoTien % 1000;
-        SoTien = Math.floor(SoTien / 1000);
-        ty = SoTien;
-
-        if (ty > 0) {
-            chuoi += docTrieu(ty, false) + " tỷ";
-            hauto = " triệu";
-        }
-        if (trieu > 0) {
-            chuoi += docTrieu(trieu, ty > 0) + " triệu";
-            hauto = " nghìn";
-        } else if (ty > 0 && (ngan > 0 || dong > 0)) {
-            chuoi += " triệu";
-        }
-        if (ngan > 0) {
-            chuoi += docTrieu(ngan, ty > 0 || trieu > 0) + " nghìn";
-        } else if ((ty > 0 || trieu > 0) && dong > 0) {
-            chuoi += " nghìn";
-        }
-        if (dong > 0) {
-            chuoi += docTrieu(dong, true);
-        }
-
-        chuoi = chuoi.trim();
-        if (chuoi.length > 0) {
-            chuoi = chuoi.charAt(0).toUpperCase() + chuoi.slice(1) + " đồng chẵn";
-        }
-        return chuoi;
-    }
-
-    // ---------------- TỰ ĐỘNG TẢI FILE WORD (.DOCX) VỀ MÁY ----------------
-
-    document.getElementById('contractForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        // Thu thập danh sách sản phẩm
-        let products = [];
-        const rows = document.querySelectorAll('#cartBody tr');
-        rows.forEach((row, index) => {
-            products.push({
-                stt: index + 1,
-                name: row.querySelector('.prod-name').value,
-                size: row.querySelector('.prod-size').value,
-                unit: row.querySelector('.prod-unit').value,
-                qty: row.querySelector('.qty').value,
-                price: formatNumber(row.querySelector('.price').value),
-                discount: row.querySelector('.discount').value,
-                subtotal: row.querySelector('.subtotal').value
-            });
-        });
-
-        // Gom dữ liệu đầy đủ gửi vào mẫu File Word
-        const contractData = {
-            buyerCompany: document.getElementById('buyerCompany').value,
-            contractNo: document.getElementById('contractNo').value,
-            products: products,
-            subTotal: document.getElementById('lblSubTotal').innerText,
-            vatTotal: document.getElementById('lblVatTotal').innerText,
-            grandTotal: document.getElementById('lblGrandTotal').innerText,
-            amountInWords: document.getElementById('lblAmountInWords').innerText
-        };
-
-        // Giả lập xuất và tự động tải file Word về máy
-        generateWordDocument(contractData);
+    document.getElementById('savedCompanies').addEventListener('change', function() {
+        const key = this.value;
+        if (!key) return;
+        const data = JSON.parse(localStorage.getItem('saved_companies') || '{}')[key];
+        if (!data) return;
+        if (data.shortName) document.getElementById('partnerShortName').value = data.shortName;
+        document.getElementById('buyerCompany').value = data.company || '';
+        document.getElementById('buyerRep').value = data.rep || '';
+        document.getElementById('buyerRole').value = data.role || '';
+        document.getElementById('buyerAddress').value = data.address || '';
+        document.getElementById('buyerTaxCode').value = data.taxCode || '';
+        document.getElementById('buyerPhone').value = data.phone || '';
+        document.getElementById('buyerAccount').value = data.account || '';
+        document.getElementById('buyerBank').value = data.bank || '';
+        generateContractNo();
     });
 
-    function generateWordDocument(data) {
-        // Tạo một nội dung Word mẫu đơn giản và tải về máy dưới dạng .docx
-        const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Hợp Đồng</title></head><body>";
-        const footer = "</body></html>";
-        
-        let tableRows = "";
-        data.products.forEach(p => {
-            tableRows += `<tr>
-                <td style='border:1px solid #000; text-align:center;'>${p.stt}</td>
-                <td style='border:1px solid #000;'>${p.name}</td>
-                <td style='border:1px solid #000; text-align:center;'>${p.size}</td>
-                <td style='border:1px solid #000; text-align:center;'>${p.unit}</td>
-                <td style='border:1px solid #000; text-align:center;'>${p.qty}</td>
-                <td style='border:1px solid #000; text-align:right;'>${p.price}</td>
-                <td style='border:1px solid #000; text-align:center;'>${p.discount}%</td>
-                <td style='border:1px solid #000; text-align:right;'>${p.subtotal}</td>
-            </tr>`;
-        });
+    document.getElementById('btnSaveCompany').addEventListener('click', function() {
+        const name = document.getElementById('buyerCompany').value.trim();
+        if (!name) { showToast('Vui lòng điền Tên Công Ty trước khi lưu!', true); return; }
+        const data = {
+            shortName: document.getElementById('partnerShortName').value,
+            company: name,
+            rep: document.getElementById('buyerRep').value,
+            role: document.getElementById('buyerRole').value,
+            address: document.getElementById('buyerAddress').value,
+            taxCode: document.getElementById('buyerTaxCode').value,
+            phone: document.getElementById('buyerPhone').value,
+            account: document.getElementById('buyerAccount').value,
+            bank: document.getElementById('buyerBank').value
+        };
+        const companies = JSON.parse(localStorage.getItem('saved_companies') || '{}');
+        companies[name] = data;
+        localStorage.setItem('saved_companies', JSON.stringify(companies));
+        refreshCompanyDropdown();
+        document.getElementById('savedCompanies').value = name;
+        showToast(`Đã lưu "${name}" vào bộ nhớ!`);
+    });
 
-        const htmlContent = `
-            <h2 style='text-align:center;'>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</h2>
-            <h3 style='text-align:center;'>Độc lập - Tự do - Hạnh phúc</h3>
-            <h1 style='text-align:center; color:#0056b3
-;'>HỢP ĐỒNG MUA BÁN HÀNG HÓA</h1>
-            <p style='text-align:center;'><b>Số: ${data.contractNo}</b></p>
-            <p><b>Bên mua (Bên A):</b> ${data.buyerCompany}</p>
-            <br/>
-            <table style='width:100%; border-collapse:collapse;' border='1'>
-                <thead>
-                    <tr style='background-color:#f2f2f2
-;'>
-                        <th>STT</th>
-                        <th>Tên Sản Phẩm</th>
-                        <th>Kích Thước</th>
-                        <th>ĐVT</th>
-                        <th>Số Lượng</th>
-                        <th>Đơn Giá (VNĐ)</th>
-                        <th>CK</th>
-                        <th>Thành Tiền (VNĐ)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${tableRows}
-                </tbody>
-            </table>
-            <br/>
-            <p><b>Tổng tiền hàng:</b> ${data.subTotal}</p>
-            <p><b>Thuế VAT:</b> ${data.vatTotal}</p>
-            <p><b>Tổng thanh toán:</b> ${data.grandTotal}</p>
-            <p><b>Số tiền bằng chữ:</b> <i>${data.amountInWords}</i></p>
-        `;
+    document.getElementById('btnDeleteCompany').addEventListener('click', function() {
+        const key = document.getElementById('savedCompanies').value;
+        if (!key) return;
+        const companies = JSON.parse(localStorage.getItem('saved_companies') || '{}');
+        delete companies[key];
+        localStorage.setItem('saved_companies', JSON.stringify(companies));
+        refreshCompanyDropdown();
+        showToast(`Đã xóa "${key}" khỏi bộ nhớ.`);
+    });
 
-        const sourceHTML = header + htmlContent + footer;
-        const blob = new Blob(['\ufeff' + sourceHTML], { type: 'application/msword' });
-        
-        // Tự động tải File về máy
-        const fileName = `Hop_Dong_${data.contractNo.replace(/[/\\?%*:|"<>]/g, '_')}.docx`;
-        saveAs(blob, fileName);
+    // --- Toast ---
+    function showToast(msg, isError) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'toast px-6 py-3 rounded-lg shadow-lg font-medium ' + (isError ? 'bg-red-600 text-white' : 'bg-green-600 text-white');
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
     }
 
-    // Chạy tính toán ngay ban đầu
-    calculateCart();
-</script>
+    // --- Products JSON ---
+    function getProducts() {
+        const names = document.querySelectorAll('input[name="prodName[]"]');
+        const sizes = document.querySelectorAll('input[name="prodSize[]"]');
+        const units = document.querySelectorAll('input[name="prodUnit[]"]');
+        const qtys = document.querySelectorAll('input[name="prodQty[]"]');
+        const prices = document.querySelectorAll('input[name="prodPrice[]"]');
+        const discounts = document.querySelectorAll('input[name="prodDiscount[]"]');
+        const subtotals = document.querySelectorAll('input[name="prodSubtotal[]"]');
+        const products = [];
+        for (let i = 0; i < names.length; i++) {
+            products.push({ name: names[i].value, size: sizes[i].value, unit: units[i].value, qty: qtys[i].value, price: prices[i].value, discount: discounts[i].value, subtotal: subtotals[i] ? subtotals[i].value : '0' });
+        }
+        return JSON.stringify(products);
+    }
 
-</body>
+    // --- Order presets ---
+    function getSavedPresets() { return JSON.parse(localStorage.getItem('order_presets') || '{}'); }
+    function refreshPresetDropdown() {
+        const select = document.getElementById('presetSelect');
+        select.innerHTML = '<option value="">-- Chọn đơn hàng mẫu đã lưu --</option>';
+        Object.keys(getSavedPresets()).forEach(name => {
+            const option = document.createElement('option'); option.value = name; option.textContent = name; select.appendChild(option);
+        });
+    }
+    function collectPreset() {
+        return {
+            buyerCompany: document.getElementById('buyerCompany').value,
+            vatRate: document.getElementById('vatRate').value,
+            products: [...document.querySelectorAll('#productBody tr')].map(row => ({
+                name: row.querySelector('[name="prodName[]"]').value, size: row.querySelector('[name="prodSize[]"]').value,
+                unit: row.querySelector('[name="prodUnit[]"]').value, qty: row.querySelector('[name="prodQty[]"]').value,
+                price: row.querySelector('[name="prodPrice[]"]').value, discount: row.querySelector('[name="prodDiscount[]"]').value
+            }))
+        };
+    }
+    function loadPreset() {
+        const name = document.getElementById('presetSelect').value, data = getSavedPresets()[name]; if (!data) return;
+        document.getElementById('buyerCompany').value = data.buyerCompany || '';
+        document.getElementById('vatRate').value = data.vatRate || '8';
+        document.getElementById('productBody').innerHTML = '';
+        (data.products || []).forEach(product => addRow(product));
+        calculateTotals(); showToast(`Đã tải đơn mẫu "${name}".`);
+    }
+    document.getElementById('presetSelect').addEventListener('change', loadPreset);
+    document.getElementById('btnSavePreset').addEventListener('click', () => {
+        const name = document.getElementById('presetNameInput').value.trim();
+        if (!name) { showToast('Vui lòng nhập tên đơn mẫu!', true); return; }
+        const presets = getSavedPresets(); presets[name] = collectPreset();
+        localStorage.setItem('order_presets', JSON.stringify(presets));
+        document.getElementById('presetNameInput').value = ''; refreshPresetDropdown(); showToast(`Đã lưu đơn mẫu "${name}".`);
+    });
+    document.getElementById('btnDeletePreset').addEventListener('click', () => {
+        const select = document.getElementById('presetSelect'), name = select.value;
+        if (!name) { showToast('Vui lòng chọn đơn mẫu cần xóa!', true); return; }
+        const presets = getSavedPresets(); delete presets[name]; localStorage.setItem('order_presets', JSON.stringify(presets));
+        refreshPresetDropdown(); showToast(`Đã xóa đơn mẫu "${name}".`);
+    });
+
+    // --- Word export ---
+    function escapeWordText(value) {
+        return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function exportWordDocument(docType = 'HDNT') {
+        calculateTotals();
+        const rows = [...document.querySelectorAll('#productBody tr')];
+        const productRows = rows.map((row, index) => {
+            const get = name => row.querySelector(`[name="${name}[]"]`)?.value || '';
+            return `<tr><td>${index + 1}</td><td>${escapeWordText(get('prodName'))}</td><td>${escapeWordText(get('prodSize'))}</td><td>${escapeWordText(get('prodUnit'))}</td><td>${escapeWordText(get('prodQty'))}</td><td>${escapeWordText(get('prodPrice'))}</td><td>${escapeWordText(get('prodDiscount'))}%</td><td>${escapeWordText(get('prodSubtotal'))}</td></tr>`;
+        }).join('');
+        const contractNo = document.getElementById('contractNo').value || 'chua-co-so';
+        const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;color:#222}h1,h2,h3{text-align:center}table{width:100%;border-collapse:collapse}th,td{border:1px solid #777;padding:6px}th{background:#f2f2f2}td:nth-child(1),td:nth-child(4),td:nth-child(5),td:nth-child(7){text-align:center}td:nth-child(6),td:nth-child(8){text-align:right}</style></head><body><h2>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</h2><h3>Độc lập - Tự do - Hạnh phúc</h3><h1>${docType === 'PO' ? 'ĐƠN ĐẶT HÀNG (PO)' : 'HỢP ĐỒNG NGUYÊN TẮC'}</h1><p><b>Số:</b> ${escapeWordText(contractNo)}</p><p><b>Bên mua (Bên A):</b> ${escapeWordText(document.getElementById('buyerCompany').value)}</p><table><thead><tr><th>STT</th><th>Tên hàng hóa / Quy cách</th><th>Kích thước</th><th>ĐVT</th><th>Số lượng</th><th>Đơn giá (VNĐ)</th><th>CK</th><th>Thành tiền (VNĐ)</th></tr></thead><tbody>${productRows}</tbody></table><p><b>Tổng tiền hàng:</b> ${escapeWordText(document.getElementById('lblSubTotal').textContent)}</p><p><b>Thuế VAT:</b> ${escapeWordText(document.getElementById('lblVatTotal').textContent)}</p><p><b>Tổng thanh toán:</b> ${escapeWordText(document.getElementById('lblGrandTotal').textContent)}</p><p><b>Số tiền bằng chữ:</b> <i>${escapeWordText(document.getElementById('lblAmountInWords').textContent)}</i></p></body></html>`;
+        const blob = new Blob(['\\ufeff', html], { type: 'application/msword' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Hop_Dong_${contractNo.replace(/[/\\?%*:|"<>]/g, '_')}.doc`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+        showToast('Đã tải file Word thành công!');
+    }
+
+    document.getElementById('exportWordBtn').addEventListener('click', () => exportWordDocument('HDNT'));
+    document.getElementById('exportPoBtn').addEventListener('click', () => exportWordDocument('PO'));
+
+    // --- Data SDK ---
+    const dataHandler = { onDataChanged(data) {} };
+    async function initApp() {
+        const r = await window.dataSdk.init(dataHandler);
+        if (!r.isOk) showToast('Lỗi kết nối lưu trữ dữ liệu', true);
+    }
+    initApp();
+
+    document.getElementById('contractForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
+
+        const record = {
+            company: document.querySelector('input[name="company"]:checked').value,
+            document_type: document.getElementById('documentType').value,
+            contract_no: document.getElementById('contractNo').value,
+            created_date: document.getElementById('createdDate').value,
+            ref_contract_no: document.getElementById('refContractNo').value || '',
+            buyer_company: document.getElementById('buyerCompany').value,
+            buyer_rep: document.getElementById('buyerRep').value,
+            buyer_role: document.getElementById('buyerRole').value,
+            buyer_address: document.getElementById('buyerAddress').value,
+            buyer_tax_code: document.getElementById('buyerTaxCode').value,
+            buyer_phone: document.getElementById('buyerPhone').value,
+            buyer_account: document.getElementById('buyerAccount').value,
+            buyer_bank: document.getElementById('buyerBank').value,
+            print_type: document.getElementById('printType').value,
+            vat_rate: document.getElementById('vatRate').value,
+            annual_volume: document.getElementById('annualVolume').value || '',
+            commit_type: document.getElementById('commitType').value || '',
+            cam_ket_bag_qty: document.getElementById('camKetBagQty').value || '',
+            deposit_percent: document.getElementById('depositPercent').value || '',
+            delivery_address: document.getElementById('deliveryAddress').value || '',
+            delivery_date: document.getElementById('deliveryDate').value || '',
+            products_json: getProducts(),
+            subtotal: String(calculateTotals().subtotal),
+            vat_amount: String(calculateTotals().vat),
+            grand_total: String(calculateTotals().grand),
+            amount_in_words: calculateTotals().words
+        };
+
+        const result = await window.dataSdk.create(record);
+        btn.disabled = false;
+        btn.style.opacity = '1';
+
+        if (result.isOk) {
+            showToast('Dữ liệu đã được lưu thành công!');
+            e.target.reset();
+            document.getElementById('createdDate').valueAsDate = new Date();
+            handleFormChange();
+        } else {
+            showToast('Lỗi! Không thể lưu dữ liệu.', true);
+        }
+    });
+
+    // Init
+    refreshCompanyDropdown();
+    refreshPresetDropdown();
+    handleFormChange();
+    calculateTotals();
+</script>
+ </body>
 </html>
