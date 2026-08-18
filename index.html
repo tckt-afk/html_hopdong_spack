@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="vi">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tạo Thông Tin Hợp Đồng</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+        body { font-family: 'Work Sans', sans-serif; }
+        .radio-card { transition: all 0.2s; }
+        .radio-card:has(input:checked) { border-color: #0056b3; background: #eef5ff; }
+        .cfield { display: none !important; }
+        .cfield.visible { display: flex !important; }
+        .cfield-block.visible { display: block !important; }
+        .cfield-block { display: none !important; }
+        .toast { transform: translateY(-100%); opacity: 0; transition: all 0.3s; position: fixed; top: 1rem; left: 50%; transform: translateX(-50%) translateY(-100%); z-index: 50; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* GitHub Pages standalone styles */
+    body {
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+    .canva-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+      border: 0;
+      cursor: pointer;
+      transition: all .18s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,.08);
+    }
+    .canva-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0,0,0,.12);
+    }
+    #btnSaveCompany { background: #11a9c4; }
+    #btnSaveCompany:hover { background: #0d8ea5; }
+    .field-table .canva-button { background: #20a84a; color: #fff; }
+    .field-table .canva-button:hover { background: #188c3c; }
+    #exportWordBtn { background: #2563eb; }
+    #exportWordBtn:hover { background: #1d4ed8; }
+    #exportPoBtn { background: #7c3aed; }
+    #exportPoBtn:hover { background: #6d28d9; }
+    #submitBtn { background: #16a34a; }
+    #submitBtn:hover { background: #15803d; }
+    .canva-text { color: #075eaf; }
+    .canva-section { background: #f8fbff; }
+    input, select, button, textarea { font-family: inherit; }
+    </style>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  <script src="https://unpkg.com/docxtemplater@3.69.3/build/docxtemplater.js"></script>
+  <script src="https://unpkg.com/pizzip@3.2.0/dist/pizzip.js"></script>
+  <script src="https://unpkg.com/file-saver@1.3.8/FileSaver.js"></script>
+
+ </head>
+ <body class="min-h-screen p-4 md:p-8">
+  <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
+   <h1 class="canva-text text-center font-bold text-xl md:text-2xl uppercase mb-6">TẠO THÔNG TIN HỢP ĐỒNG</h1>
+   <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex flex-wrap items-center gap-3">
+    <label for="presetSelect" class="text-sm font-bold text-blue-900 whitespace-nowrap">📁 Tải đơn mẫu:</label> <select id="presetSelect" class="flex-1 min-w-[200px] p-2 border border-gray-300 rounded-md text-sm"><option value="">-- Chọn đơn hàng mẫu đã lưu --</option></select> <input type="text" id="presetNameInput" placeholder="Tên đơn mẫu (VD: Mẫu Túi Cam - Cty ABC)" class="flex-1 min-w-[220px] p-2 border border-gray-300 rounded-md text-sm"> <button type="button" id="btnSavePreset" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-bold">💾 Lưu Đơn Mẫu</button> <button type="button" id="btnDeletePreset" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-md text-sm font-bold">🗑️ Xóa</button>
+   </div>
+   <div id="toast" class="toast bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg font-medium">
+    Dữ liệu đã được lưu thành công!
+   </div>
+   <form id="contractForm"><!-- MỤC 1 -->
+    <div class="canva-section rounded-xl p-5 mb-6 text-center border-2 border-blue-200">
+     <h2 class="canva-text font-bold mb-4">MỤC 1: CHỌN CÔNG TY</h2>
+     <div class="flex flex-wrap justify-center gap-4"><label class="radio-card bg-white px-5 py-3 rounded-lg border-2 border-gray-300 cursor-pointer font-semibold flex items-center gap-2"> <input type="radio" name="company" value="SPACK" checked class="scale-125"> CÔNG TY S-PACK </label> <label class="radio-card bg-white px-5 py-3 rounded-lg border-2 border-gray-300 cursor-pointer font-semibold flex items-center gap-2"> <input type="radio" name="company" value="SWIFT" class="scale-125"> CÔNG TY SWIFT PACK </label>
+     </div>
+    </div><!-- MỤC 2 -->
+    <h3 class="canva-text font-bold uppercase border-b-2 border-blue-700 pb-1 mb-4 mt-6">MỤC 2: THÔNG TIN VĂN BẢN</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+     <div class="flex flex-col"><label for="documentType" class="text-sm font-semibold text-gray-600 mb-1">Mẫu văn bản cần tạo *</label> <select id="documentType" name="documentType" required class="p-2.5 border border-gray-300 rounded-md font-semibold text-blue-800 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"> <option value="HDNT">Mẫu 01: Hợp đồng Nguyên Tắc 2026</option> <option value="HDMB">Mẫu 02: Hợp đồng Mua Bán Từng Đợt 2026</option> <option value="DDH">Mẫu 03: Đơn Đặt Hàng Độc Lập</option> <option value="BBBG">Mẫu 04: Biên Bản Bàn Giao Hàng Hóa</option> <option value="BBCC">Mẫu 05: Biên Bản Cam Kết (Thuế BVMT)</option> </select>
+     </div>
+     <div class="flex flex-col"><label for="partnerShortName" class="text-sm font-semibold text-gray-600 mb-1">Tên ngắn đối tác (VD: Tiki) *</label> <input type="text" id="partnerShortName" name="partnerShortName" placeholder="VD: ABC" required class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col"><label for="contractNo" class="text-sm font-semibold text-gray-600 mb-1">Số Văn Bản / Hợp Đồng</label> <input type="text" id="contractNo" name="contractNo" readonly class="p-2.5 border border-gray-300 rounded-md bg-gray-100">
+     </div>
+     <div class="flex flex-col"><label for="createdDate" class="text-sm font-semibold text-gray-600 mb-1">Ngày lập văn bản *</label> <input type="date" id="createdDate" name="createdDate" required class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-ref md:col-span-2"><label for="refContractNo" class="text-sm font-semibold text-gray-600 mb-1">Căn cứ theo HĐ / Đơn hàng số (nếu có)</label> <input type="text" id="refContractNo" name="refContractNo" placeholder="VD: 01/2026/HĐNT..." class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+    </div><!-- MỤC 3 -->
+    <h3 class="canva-text font-bold uppercase border-b-2 border-blue-700 pb-1 mb-4 mt-6">MỤC 3: THÔNG TIN KHÁCH HÀNG</h3><!-- Saved company selector -->
+    <div class="bg-gray-100 border border-dashed border-gray-400 rounded-lg p-3 mb-4 flex flex-wrap items-center gap-3"><label for="savedCompanies" class="text-sm font-bold text-gray-600 whitespace-nowrap">Chọn nhanh công ty đã lưu:</label> <select id="savedCompanies" class="flex-grow p-2 border border-gray-300 rounded-md font-semibold text-sm"> <option value="">-- Chọn công ty đã lưu --</option> </select> <button type="button" id="btnDeleteCompany" class="bg-gray-500 text-white px-3 py-2 rounded-md text-xs font-bold hover:bg-gray-600">Xóa</button>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+     <div class="flex flex-col md:col-span-2"><label for="buyerCompany" class="text-sm font-semibold text-gray-600 mb-1">Tên Công Ty Đầy Đủ *</label> <input type="text" id="buyerCompany" name="buyerCompany" required class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-legal"><label for="buyerRep" class="text-sm font-semibold text-gray-600 mb-1">Người Đại Diện *</label> <input type="text" id="buyerRep" name="buyerRep" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-legal"><label for="buyerRole" class="text-sm font-semibold text-gray-600 mb-1">Chức Vụ *</label> <input type="text" id="buyerRole" name="buyerRole" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col md:col-span-2"><label for="buyerAddress" class="text-sm font-semibold text-gray-600 mb-1">Địa Chỉ ĐKKD / Kho *</label> <input type="text" id="buyerAddress" name="buyerAddress" required class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col"><label for="buyerTaxCode" class="text-sm font-semibold text-gray-600 mb-1">Mã Số Thuế *</label> <input type="text" id="buyerTaxCode" name="buyerTaxCode" required class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-bank"><label for="buyerPhone" class="text-sm font-semibold text-gray-600 mb-1">Số Điện Thoại</label> <input type="tel" id="buyerPhone" name="buyerPhone" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-bank"><label for="buyerAccount" class="text-sm font-semibold text-gray-600 mb-1">Số Tài Khoản Ngân Hàng</label> <input type="text" id="buyerAccount" name="buyerAccount" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-bank"><label for="buyerBank" class="text-sm font-semibold text-gray-600 mb-1">Mở Tại Ngân Hàng</label> <input type="text" id="buyerBank" name="buyerBank" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+    </div><button type="button" id="btnSaveCompany" class="canva-button mt-3 px-4 py-2 rounded-md text-white font-semibold text-sm">💾 Lưu thông tin Công ty này vào máy</button> <!-- MỤC 4 -->
+    <h3 class="canva-text font-bold uppercase border-b-2 border-blue-700 pb-1 mb-4 mt-6">MỤC 4: THÔNG TIN ĐẶC THÙ &amp; SẢN PHẨM</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+     <div class="flex flex-col cfield field-m01 md:col-span-2"><label for="annualVolume" class="text-sm font-semibold text-gray-600 mb-1">Sản lượng dự kiến 01 năm *</label> <input type="text" id="annualVolume" name="annualVolume" placeholder="VD: 20.000 cuộn tương đương 22.400kg" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-m01 md:col-span-2"><label for="commitType" class="text-sm font-semibold text-gray-600 mb-1">Phương thức Cam kết Thuế BVMT *</label> <select id="commitType" name="commitType" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100"> <option value="TH1">TH1: Ký 1 biên bản cam kết cho dự kiến cả năm</option> <option value="TH2">TH2: Ký biên bản cam kết riêng cho từng đơn hàng</option> </select>
+     </div>
+     <div class="flex flex-col cfield field-m05 md:col-span-2"><label for="camKetBagQty" class="text-sm font-semibold text-gray-600 mb-1">Cam kết số lượng túi (Không chịu thuế BVMT) *</label> <input type="text" id="camKetBagQty" name="camKetBagQty" placeholder="VD: 10.000 cuộn (tương đương 11.200 kg)" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-payment"><label for="printType" class="text-sm font-semibold text-gray-600 mb-1">Hình thức In ấn *</label> <select id="printType" name="printType" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100"> <option value="no_print">Không in (TT 100% trước xuất kho)</option> <option value="printed">In Công Nghiệp (Cọc 80%)</option> </select>
+     </div>
+     <div class="flex flex-col cfield field-payment"><label for="vatRate" class="text-sm font-semibold text-gray-600 mb-1">Thuế VAT *</label> <select id="vatRate" name="vatRate" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100"> <option value="8">8%</option> <option value="10">10%</option> <option value="0">0%</option> </select>
+     </div>
+     <div class="flex flex-col cfield field-deposit"><label for="depositPercent" class="text-sm font-semibold text-gray-600 mb-1">Tỷ lệ đặt cọc Lần 1</label> <input type="text" id="depositPercent" name="depositPercent" placeholder="VD: 80% giá trị HĐ" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-delivery md:col-span-2"><label for="deliveryAddress" class="text-sm font-semibold text-gray-600 mb-1">Địa điểm giao hàng *</label> <input type="text" id="deliveryAddress" name="deliveryAddress" placeholder="Kho Bên A tại..." class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+     <div class="flex flex-col cfield field-delivery"><label for="deliveryDate" class="text-sm font-semibold text-gray-600 mb-1">Thời hạn giao hàng *</label> <input type="text" id="deliveryDate" name="deliveryDate" placeholder="VD: Giao hàng trước ngày 25/08/2026" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+     </div>
+
+     <div class="flex flex-col cfield field-term-production md:col-span-2"><label for="productionTime" class="text-sm font-semibold text-amber-700 mb-1">🟨 Thời gian sản xuất / giao hàng</label><input type="text" id="productionTime" class="p-2.5 border border-amber-300 bg-amber-50 rounded-md"></div>
+     <div class="flex flex-col cfield field-term-hdnt md:col-span-2"><label for="deliveryTime" class="text-sm font-semibold text-amber-700 mb-1">🟨 Khoảng thời gian giao nhận</label><input type="text" id="deliveryTime" class="p-2.5 border border-amber-300 bg-amber-50 rounded-md"></div>
+     <div class="flex flex-col cfield field-term-hdnt md:col-span-2"><label for="shippingCostClause" class="text-sm font-semibold text-amber-700 mb-1">🟨 Điều khoản chi phí giao hàng</label><textarea id="shippingCostClause" rows="2" class="p-2.5 border border-amber-300 bg-amber-50 rounded-md"></textarea></div>
+     <div class="flex flex-col cfield field-term-hdnt md:col-span-2"><label for="paymentStage1Text" class="text-sm font-semibold text-amber-700 mb-1">🟨 Nội dung thanh toán giai đoạn 1</label><textarea id="paymentStage1Text" rows="2" class="p-2.5 border border-amber-300 bg-amber-50 rounded-md"></textarea></div>
+     <div class="flex flex-col cfield field-term-hdnt md:col-span-2"><label for="paymentStage2Text" class="text-sm font-semibold text-amber-700 mb-1">🟨 Nội dung thanh toán giai đoạn 2</label><textarea id="paymentStage2Text" rows="2" class="p-2.5 border border-amber-300 bg-amber-50 rounded-md"></textarea></div>
+     <div class="flex flex-col cfield field-term-hdnt"><label for="stockNoticeTime" class="text-sm font-semibold text-amber-700 mb-1">🟨 Thời gian báo trước khi xuất kho</label><input type="text" id="stockNoticeTime" class="p-2.5 border border-amber-300 bg-amber-50 rounded-md"></div>
+
+     <div class="flex flex-col cfield field-term-hdmb"><label for="depositAmountText" class="text-sm font-semibold text-amber-700 mb-1">🟨 Số tiền đặt cọc Lần 1</label><input type="text" id="depositAmountText" placeholder="Để trống = tự tính theo %" class="p-2.5 border border-amber-300 bg-amber-50 rounded-md"></div>
+     <div class="flex flex-col cfield field-term-hdmb md:col-span-2"><label for="afterDeliveryPayment" class="text-sm font-semibold text-amber-700 mb-1">🟨 Thời điểm thanh toán phần còn lại</label><input type="text" id="afterDeliveryPayment" class="p-2.5 border border-amber-300 bg-amber-50 rounded-md"></div>
+     <div class="flex flex-col cfield field-term-swift-hdmb md:col-span-2"><label for="freightNote" class="text-sm font-semibold text-amber-700 mb-1">🟨 Ghi chú phí vận chuyển (SWIFT)</label><textarea id="freightNote" rows="2" class="p-2.5 border border-amber-300 bg-amber-50 rounded-md"></textarea></div>
+
+     <div class="flex flex-col cfield field-term-bbcc md:col-span-2"><label for="commitmentParagraph" class="text-sm font-semibold text-amber-700 mb-1">🟨 Nội dung cam kết (có thể sửa trực tiếp)</label><textarea id="commitmentParagraph" rows="7" class="p-2.5 border border-amber-300 bg-amber-50 rounded-md"></textarea></div>
+    </div><!-- Bảng sản phẩm -->
+    <div class="cfield-block field-table mt-4">
+     <h3 class="canva-text font-bold uppercase border-b-2 border-blue-700 pb-1 mb-4">DANH SÁCH SẢN PHẨM</h3>
+     <div class="overflow-x-auto">
+      <table class="w-full border-collapse text-sm" id="productTable">
+       <thead>
+        <tr class="bg-gray-50">
+         <th class="border border-gray-300 p-2 text-left">Tên hàng hóa / Quy cách</th>
+         <th class="border border-gray-300 p-2 w-24">Kích thước</th>
+         <th class="border border-gray-300 p-2 w-16">ĐVT</th>
+         <th class="border border-gray-300 p-2 w-20">Số lượng</th>
+         <th class="border border-gray-300 p-2 w-28 col-price">Đơn giá (VNĐ)</th>
+         <th class="border border-gray-300 p-2 w-16 col-price">CK(%)</th>
+         <th class="border border-gray-300 p-2 w-32 col-price">Thành tiền (VNĐ)</th>
+         <th class="border border-gray-300 p-2 w-28">Ghi chú</th>
+         <th class="border border-gray-300 p-2 w-12">Xóa</th>
+        </tr>
+       </thead>
+       <tbody id="productBody">
+        <tr>
+         <td class="border border-gray-300 p-1"><input type="text" name="prodName[]" placeholder="Túi/Màng gói hàng..." required class="w-full p-1.5 border-0 focus:ring-0"></td>
+         <td class="border border-gray-300 p-1"><input type="text" name="prodSize[]" placeholder="28*42" class="w-full p-1.5 border-0 focus:ring-0"></td>
+         <td class="border border-gray-300 p-1"><input type="text" name="prodUnit[]" value="Cuộn" class="w-full p-1.5 border-0 focus:ring-0"></td>
+         <td class="border border-gray-300 p-1"><input type="number" name="prodQty[]" required class="w-full p-1.5 border-0 focus:ring-0"></td>
+         <td class="border border-gray-300 p-1 col-price"><input type="number" name="prodPrice[]" class="w-full p-1.5 border-0 focus:ring-0"></td>
+         <td class="border border-gray-300 p-1 col-price"><input type="number" name="prodDiscount[]" value="0" class="w-full p-1.5 border-0 focus:ring-0"></td>
+         <td class="border border-gray-300 p-1 col-price"><input type="text" name="prodSubtotal[]" readonly value="0" class="w-full p-1.5 border-0 bg-gray-100 text-right font-semibold"></td>
+         <td class="border border-gray-300 p-1"><input type="text" name="prodNote[]" class="w-full p-1.5 border-0 focus:ring-0"></td>
+         <td class="border border-gray-300 p-1 text-center"><button type="button" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-bold" onclick="removeRow(this)">X</button></td>
+        </tr>
+       </tbody>
+      </table>
+     </div><button type="button" class="canva-button mt-3 px-4 py-2 rounded-md text-white font-semibold text-sm" onclick="addRow()">+ Thêm Sản Phẩm</button>
+     <div class="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4 space-y-2 text-sm">
+      <div class="flex justify-between"><span>Tổng tiền hàng (chưa VAT):</span><strong id="lblSubTotal">0 VNĐ</strong>
+      </div>
+      <div class="flex justify-between"><span>Thuế GTGT (VAT):</span><strong id="lblVatTotal">0 VNĐ</strong>
+      </div>
+      <div class="flex justify-between border-t border-yellow-200 pt-2 text-base text-red-600"><span>TỔNG THANH TOÁN:</span><strong id="lblGrandTotal">0 VNĐ</strong>
+      </div>
+      <div class="pt-2 italic font-semibold text-blue-700">
+       Số tiền bằng chữ: <span id="lblAmountInWords">Không đồng./.</span>
+      </div>
+     </div>
+    </div>
+    <div class="flex flex-col md:flex-row gap-3 mt-8"><button type="button" id="exportWordBtn" class="canva-button flex-1 py-4 rounded-lg text-white font-bold text-lg uppercase">📄 Xuất Word</button> <button type="button" id="exportPoBtn" class="canva-button flex-1 py-4 rounded-lg text-white font-bold text-lg uppercase">📦 Xuất PO</button> <button type="submit" id="submitBtn" class="canva-button flex-1 py-4 rounded-lg text-white font-bold text-lg uppercase">💾 Lưu thông tin</button>
+    </div>
+   </form>
+  </div>
+  <script>
+    document.getElementById('createdDate').valueAsDate = new Date();
+
+    // --- Contract number generation ---
+    function generateContractNo() {
+        const company = document.querySelector('input[name="company"]:checked').value;
+        const docType = document.getElementById('documentType').value;
+        const partner = document.getElementById('partnerShortName').value.toUpperCase() || '[ĐỐI-TÁC]';
+        const year = new Date().getFullYear();
+        const sellerCode = company === 'SPACK' ? 'SP' : 'SWIFT';
+        let code = '';
+        if (docType === 'HDNT') code = `${company === 'SPACK' ? '05' : '08'}/${year}/HĐNT/${partner}-${sellerCode}`;
+        else if (docType === 'HDMB') code = `01/${year}/HĐMB/${partner}-${sellerCode}`;
+        else if (docType === 'DDH') code = `01/${partner}-${sellerCode}`;
+        else if (docType === 'BBBG') code = `BBGN/${partner}-${sellerCode}`;
+        else if (docType === 'BBCC') code = `BBCC/${partner}-${sellerCode}`;
+        document.getElementById('contractNo').value = code;
+    }
+
+    // --- Dynamic field visibility ---
+    const fieldRules = {
+        HDNT: ['field-legal','field-bank','field-m01','field-payment','field-delivery','field-table','field-term-production','field-term-hdnt'],
+        HDMB: ['field-legal','field-bank','field-deposit','field-payment','field-delivery','field-table','field-term-production','field-term-hdmb'],
+        DDH:  ['field-ref','field-payment','field-delivery','field-table'],
+        BBBG: ['field-legal','field-ref','field-table'],
+        BBCC: ['field-legal','field-m05','field-ref','field-term-bbcc']
+    };
+
+    function setIfEmpty(id, value) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const previousAuto = el.dataset.autoValue || '';
+        if (!el.value.trim() || el.value === previousAuto) {
+            el.value = value;
+            el.dataset.autoValue = value;
+        }
+    }
+
+    function applyTermDefaults() {
+        const company = document.querySelector('input[name="company"]:checked').value;
+        const docType = document.getElementById('documentType').value;
+        if (docType === 'HDNT') {
+            setIfEmpty('productionTime', 'Trong vòng 30 ngày');
+            setIfEmpty('deliveryTime', '30 – 45 ngày');
+            setIfEmpty('shippingCostClause', 'Chi phí vận chuyển/bốc xếp sẽ do bên A chịu.');
+            setIfEmpty('paymentStage1Text', 'Thanh toán 80% giá trị đơn hàng (không bao gồm thuế GTGT) ngay sau khi hai Bên ký Đơn Đặt Hàng.');
+            setIfEmpty('paymentStage2Text', 'Thanh toán 20% còn lại theo nghiệm thu thực tế và thuế GTGT trước khi xuất kho bên B/ sau khi nhận đủ hàng trong vòng 05 ngày làm việc.');
+            setIfEmpty('stockNoticeTime', 'trước 05 ngày');
+            setIfEmpty('annualVolume', '20.000 cuộn tương đương 22.400kg');
+        }
+        if (docType === 'HDMB') {
+            setIfEmpty('productionTime', '25-35 ngày');
+            setIfEmpty('depositPercent', '80%');
+            setIfEmpty('afterDeliveryPayment', 'thanh toán ngay sau khi bàn giao hàng hóa');
+            if (company === 'SWIFT') setIfEmpty('freightNote', 'Đơn giá trên chưa bao gồm phí vận chuyển đến địa điểm kho của bên A (chi phí vận chuyển có thể thay đổi theo thực tế tại thời điểm giao nhận và chính sách Bên B tùy từng giai đoạn).');
+        }
+        if (docType === 'DDH') {
+            setIfEmpty('deliveryDate', 'Giao hàng trước ngày 25/08/2026');
+        }
+        if (docType === 'BBCC') refreshCommitmentParagraph(false);
+    }
+
+    function refreshCommitmentParagraph(force = false) {
+        const el = document.getElementById('commitmentParagraph');
+        if (!el || (!force && el.value.trim())) return;
+        const qty = document.getElementById('camKetBagQty').value.trim() || '..... cuộn túi gói hàng (dự kiến), tương đương ..... kg';
+        const ref = document.getElementById('refContractNo').value.trim() || '................................';
+        const d = getDateParts();
+        const dateText = `${d.day}/${d.month}/${d.year}`;
+        el.value = `Tôi/Chúng tôi cam kết việc mua ${qty} theo hợp đồng nguyên tắc/hợp đồng mua bán/đơn hàng số ${ref} ngày ${dateText} của Quý Công ty là để đóng gói sản phẩm hoặc phục vụ cho dịch vụ đóng gói sản phẩm được thực hiện trước khi sản phẩm được đưa ra ngoài thị trường tiêu thụ. Số lượng dự kiến cam kết mua trên sẽ được đính kèm theo hợp đồng nguyên tắc/hợp đồng mua bán/đơn hàng số ${ref} ngày ${dateText} và có hiệu lực đối với các đơn đặt hàng được đính kèm theo Hợp đồng này.`;
+    }
+
+    function handleFormChange() {
+        generateContractNo();
+        const docType = document.getElementById('documentType').value;
+        const visibleClasses = fieldRules[docType] || [];
+
+        // Hide all conditional fields
+        document.querySelectorAll('.cfield, .cfield-block').forEach(el => el.classList.remove('visible'));
+
+        // Show relevant ones
+        visibleClasses.forEach(cls => {
+            document.querySelectorAll('.' + cls).forEach(el => el.classList.add('visible'));
+        });
+
+        const company = document.querySelector('input[name="company"]:checked').value;
+        if (docType === 'HDMB' && company === 'SWIFT') {
+            document.querySelectorAll('.field-term-swift-hdmb').forEach(el => el.classList.add('visible'));
+        }
+
+        // SWIFT hiện chỉ có 4 mẫu Word đã gửi, chưa có Mẫu 05 BBCC.
+        const bbccOption = document.querySelector('#documentType option[value="BBCC"]');
+        bbccOption.disabled = company === 'SWIFT';
+        if (company === 'SWIFT' && docType === 'BBCC') {
+            document.getElementById('documentType').value = 'HDNT';
+            return handleFormChange();
+        }
+
+        // Toggle required on legal fields
+        const needsLegal = ['HDNT','HDMB','BBBG','BBCC'].includes(docType);
+        document.getElementById('buyerRep').toggleAttribute('required', needsLegal);
+        document.getElementById('buyerRole').toggleAttribute('required', ['HDNT','HDMB','BBCC'].includes(docType));
+
+        applyTermDefaults();
+
+        // Hide price columns for BBBG
+        document.querySelectorAll('.col-price').forEach(el => {
+            el.style.display = docType === 'BBBG' ? 'none' : '';
+        });
+    }
+
+    document.getElementById('documentType').addEventListener('change', handleFormChange);
+    document.getElementById('partnerShortName').addEventListener('input', generateContractNo);
+    document.querySelectorAll('input[name="company"]').forEach(r => r.addEventListener('change', handleFormChange));
+    ['camKetBagQty','refContractNo','createdDate'].forEach(id => document.getElementById(id).addEventListener('change', () => {
+        if (document.getElementById('documentType').value === 'BBCC' && !document.getElementById('commitmentParagraph').dataset.manual) refreshCommitmentParagraph(true);
+    }));
+    document.getElementById('commitmentParagraph').addEventListener('input', function(){ this.dataset.manual='1'; });
+
+
+    // --- Automatic totals and Vietnamese number words ---
+    function formatMoney(value) { return new Intl.NumberFormat('vi-VN').format(Math.round(value)); }
+    const numberWords = ['không','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
+    function readThreeDigits(n, full) {
+        const h = Math.floor(n / 100), t = Math.floor((n % 100) / 10), u = n % 10; let s = '';
+        if (full || h) { s += numberWords[h] + ' trăm'; if (!t && u) s += ' lẻ'; }
+        if (t > 1) s += ' ' + numberWords[t] + ' mươi'; else if (t === 1) s += ' mười';
+        if (u) s += (t > 1 && u === 1 ? ' mốt' : t > 0 && u === 5 ? ' lăm' : ' ' + numberWords[u]);
+        return s;
+    }
+    function docSoTiengViet(value) {
+        value = Math.round(value); if (!value) return 'Không đồng';
+        const units = ['', ' nghìn', ' triệu', ' tỷ']; let n = value, parts = [], i = 0;
+        while (n > 0) { const block = n % 1000; if (block) parts.unshift(readThreeDigits(block, n >= 1000) + units[i]); n = Math.floor(n / 1000); i++; }
+        return parts.join(' ').replace(/^./, c => c.toUpperCase()) + ' đồng chẵn';
+    }
+    function calculateTotals() {
+        let subtotal = 0;
+        document.querySelectorAll('#productBody tr').forEach(row => {
+            const qty = parseFloat(row.querySelector('[name="prodQty[]"]').value) || 0;
+            const price = parseFloat(row.querySelector('[name="prodPrice[]"]').value) || 0;
+            const discount = parseFloat(row.querySelector('[name="prodDiscount[]"]').value) || 0;
+            const amount = qty * price * (1 - discount / 100); subtotal += amount;
+            const output = row.querySelector('[name="prodSubtotal[]"]'); if (output) output.value = formatMoney(amount);
+        });
+        const vat = subtotal * ((parseFloat(document.getElementById('vatRate').value) || 0) / 100);
+        const grand = Math.round(subtotal + vat);
+        document.getElementById('lblSubTotal').textContent = formatMoney(subtotal) + ' VNĐ';
+        document.getElementById('lblVatTotal').textContent = formatMoney(vat) + ' VNĐ';
+        document.getElementById('lblGrandTotal').textContent = formatMoney(grand) + ' VNĐ';
+        document.getElementById('lblAmountInWords').textContent = docSoTiengViet(grand) + './.';
+        return { subtotal: Math.round(subtotal), vat: Math.round(vat), grand, words: docSoTiengViet(grand) + './.' };
+    }
+    document.getElementById('productBody').addEventListener('input', calculateTotals);
+    document.getElementById('vatRate').addEventListener('change', calculateTotals);
+
+    // --- Product table ---
+    function addRow(product = {}) {
+        const docType = document.getElementById('documentType').value;
+        const hidePrice = docType === 'BBBG' ? 'style="display:none"' : '';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="border border-gray-300 p-1"><input type="text" name="prodName[]" placeholder="Túi/Màng gói hàng..." required class="w-full p-1.5 border-0 focus:ring-0"></td>
+            <td class="border border-gray-300 p-1"><input type="text" name="prodSize[]" placeholder="28*42" class="w-full p-1.5 border-0 focus:ring-0"></td>
+            <td class="border border-gray-300 p-1"><input type="text" name="prodUnit[]" value="Cuộn" class="w-full p-1.5 border-0 focus:ring-0"></td>
+            <td class="border border-gray-300 p-1"><input type="number" name="prodQty[]" required class="w-full p-1.5 border-0 focus:ring-0"></td>
+            <td class="border border-gray-300 p-1 col-price" ${hidePrice}><input type="number" name="prodPrice[]" class="w-full p-1.5 border-0 focus:ring-0"></td>
+            <td class="border border-gray-300 p-1 col-price" ${hidePrice}><input type="number" name="prodDiscount[]" value="0" class="w-full p-1.5 border-0 focus:ring-0"></td>
+            <td class="border border-gray-300 p-1 col-price" ${hidePrice}><input type="text" name="prodSubtotal[]" readonly value="0" class="w-full p-1.5 border-0 bg-gray-100 text-right font-semibold"></td>
+            <td class="border border-gray-300 p-1"><input type="text" name="prodNote[]" class="w-full p-1.5 border-0 focus:ring-0"></td>
+            <td class="border border-gray-300 p-1 text-center"><button type="button" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-bold" onclick="removeRow(this)">X</button></td>`;
+        document.getElementById('productBody').appendChild(tr);
+        const fields = { prodName: product.name, prodSize: product.size, prodUnit: product.unit, prodQty: product.qty, prodPrice: product.price, prodDiscount: product.discount, prodNote: product.note };
+        Object.entries(fields).forEach(([name, value]) => {
+            if (value !== undefined) tr.querySelector(`[name="${name}[]"]`).value = value;
+        });
+        calculateTotals();
+    }
+
+    function removeRow(btn) {
+        if (document.querySelectorAll('#productBody tr').length > 1) btn.closest('tr').remove();
+    }
+
+    // --- Saved companies (localStorage) ---
+    function refreshCompanyDropdown() {
+        const dd = document.getElementById('savedCompanies');
+        dd.innerHTML = '<option value="">-- Chọn công ty đã lưu --</option>';
+        const companies = JSON.parse(localStorage.getItem('saved_companies') || '{}');
+        for (let key in companies) {
+            const opt = document.createElement('option');
+            opt.value = key;
+            opt.textContent = key;
+            dd.appendChild(opt);
+        }
+    }
+
+    document.getElementById('savedCompanies').addEventListener('change', function() {
+        const key = this.value;
+        if (!key) return;
+        const data = JSON.parse(localStorage.getItem('saved_companies') || '{}')[key];
+        if (!data) return;
+        if (data.shortName) document.getElementById('partnerShortName').value = data.shortName;
+        document.getElementById('buyerCompany').value = data.company || '';
+        document.getElementById('buyerRep').value = data.rep || '';
+        document.getElementById('buyerRole').value = data.role || '';
+        document.getElementById('buyerAddress').value = data.address || '';
+        document.getElementById('buyerTaxCode').value = data.taxCode || '';
+        document.getElementById('buyerPhone').value = data.phone || '';
+        document.getElementById('buyerAccount').value = data.account || '';
+        document.getElementById('buyerBank').value = data.bank || '';
+        generateContractNo();
+    });
+
+    document.getElementById('btnSaveCompany').addEventListener('click', function() {
+        const name = document.getElementById('buyerCompany').value.trim();
+        if (!name) { showToast('Vui lòng điền Tên Công Ty trước khi lưu!', true); return; }
+        const data = {
+            shortName: document.getElementById('partnerShortName').value,
+            company: name,
+            rep: document.getElementById('buyerRep').value,
+            role: document.getElementById('buyerRole').value,
+            address: document.getElementById('buyerAddress').value,
+            taxCode: document.getElementById('buyerTaxCode').value,
+            phone: document.getElementById('buyerPhone').value,
+            account: document.getElementById('buyerAccount').value,
+            bank: document.getElementById('buyerBank').value
+        };
+        const companies = JSON.parse(localStorage.getItem('saved_companies') || '{}');
+        companies[name] = data;
+        localStorage.setItem('saved_companies', JSON.stringify(companies));
+        refreshCompanyDropdown();
+        document.getElementById('savedCompanies').value = name;
+        showToast(`Đã lưu "${name}" vào bộ nhớ!`);
+    });
+
+    document.getElementById('btnDeleteCompany').addEventListener('click', function() {
+        const key = document.getElementById('savedCompanies').value;
+        if (!key) return;
+        const companies = JSON.parse(localStorage.getItem('saved_companies') || '{}');
+        delete companies[key];
+        localStorage.setItem('saved_companies', JSON.stringify(companies));
+        refreshCompanyDropdown();
+        showToast(`Đã xóa "${key}" khỏi bộ nhớ.`);
+    });
+
+    // --- Toast ---
+    function showToast(msg, isError) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'toast px-6 py-3 rounded-lg shadow-lg font-medium ' + (isError ? 'bg-red-600 text-white' : 'bg-green-600 text-white');
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // --- Products JSON ---
+    function getProducts() {
+        const names = document.querySelectorAll('input[name="prodName[]"]');
+        const sizes = document.querySelectorAll('input[name="prodSize[]"]');
+        const units = document.querySelectorAll('input[name="prodUnit[]"]');
+        const qtys = document.querySelectorAll('input[name="prodQty[]"]');
+        const prices = document.querySelectorAll('input[name="prodPrice[]"]');
+        const discounts = document.querySelectorAll('input[name="prodDiscount[]"]');
+        const subtotals = document.querySelectorAll('input[name="prodSubtotal[]"]');
+        const notes = document.querySelectorAll('input[name="prodNote[]"]');
+        const products = [];
+        for (let i = 0; i < names.length; i++) {
+            products.push({ name: names[i].value, size: sizes[i].value, unit: units[i].value, qty: qtys[i].value, price: prices[i].value, discount: discounts[i].value, subtotal: subtotals[i] ? subtotals[i].value : '0', note: notes[i] ? notes[i].value : '' });
+        }
+        return JSON.stringify(products);
+    }
+
+    // --- Order presets ---
+    function getSavedPresets() { return JSON.parse(localStorage.getItem('order_presets') || '{}'); }
+    function refreshPresetDropdown() {
+        const select = document.getElementById('presetSelect');
+        select.innerHTML = '<option value="">-- Chọn đơn hàng mẫu đã lưu --</option>';
+        Object.keys(getSavedPresets()).forEach(name => {
+            const option = document.createElement('option'); option.value = name; option.textContent = name; select.appendChild(option);
+        });
+    }
+    function collectPreset() {
+        return {
+            buyerCompany: document.getElementById('buyerCompany').value,
+            vatRate: document.getElementById('vatRate').value,
+            products: [...document.querySelectorAll('#productBody tr')].map(row => ({
+                name: row.querySelector('[name="prodName[]"]').value, size: row.querySelector('[name="prodSize[]"]').value,
+                unit: row.querySelector('[name="prodUnit[]"]').value, qty: row.querySelector('[name="prodQty[]"]').value,
+                price: row.querySelector('[name="prodPrice[]"]').value, discount: row.querySelector('[name="prodDiscount[]"]').value, note: row.querySelector('[name="prodNote[]"]')?.value || ''
+            }))
+        };
+    }
+    function loadPreset() {
+        const name = document.getElementById('presetSelect').value, data = getSavedPresets()[name]; if (!data) return;
+        document.getElementById('buyerCompany').value = data.buyerCompany || '';
+        document.getElementById('vatRate').value = data.vatRate || '8';
+        document.getElementById('productBody').innerHTML = '';
+        (data.products || []).forEach(product => addRow(product));
+        calculateTotals(); showToast(`Đã tải đơn mẫu "${name}".`);
+    }
+    document.getElementById('presetSelect').addEventListener('change', loadPreset);
+    document.getElementById('btnSavePreset').addEventListener('click', () => {
+        const name = document.getElementById('presetNameInput').value.trim();
+        if (!name) { showToast('Vui lòng nhập tên đơn mẫu!', true); return; }
+        const presets = getSavedPresets(); presets[name] = collectPreset();
+        localStorage.setItem('order_presets', JSON.stringify(presets));
+        document.getElementById('presetNameInput').value = ''; refreshPresetDropdown(); showToast(`Đã lưu đơn mẫu "${name}".`);
+    });
+    document.getElementById('btnDeletePreset').addEventListener('click', () => {
+        const select = document.getElementById('presetSelect'), name = select.value;
+        if (!name) { showToast('Vui lòng chọn đơn mẫu cần xóa!', true); return; }
+        const presets = getSavedPresets(); delete presets[name]; localStorage.setItem('order_presets', JSON.stringify(presets));
+        refreshPresetDropdown(); showToast(`Đã xóa đơn mẫu "${name}".`);
+    });
+
+    // --- Word export from the original DOCX templates ---
+    const templateMap = {
+        SPACK: {
+            HDNT: 'templates/spack_hdnt.docx', HDMB: 'templates/spack_hdmb.docx', DDH: 'templates/spack_ddh.docx',
+            BBBG: 'templates/spack_bbbg.docx', BBCC: 'templates/spack_bbcc.docx'
+        },
+        SWIFT: {
+            HDNT: 'templates/swift_hdnt.docx', HDMB: 'templates/swift_hdmb.docx', DDH: 'templates/swift_ddh.docx',
+            BBBG: 'templates/swift_bbbg.docx'
+        }
+    };
+
+    function getDateParts() {
+        const value = document.getElementById('createdDate').value;
+        const d = value ? new Date(value + 'T00:00:00') : new Date();
+        return { day: d.getDate(), month: d.getMonth()+1, year: d.getFullYear() };
+    }
+
+    function normalizePercent(v) {
+        const s = String(v || '').trim();
+        if (!s) return '80%';
+        return s.includes('%') ? s : s + '%';
+    }
+
+    function getTemplateData() {
+        const totals = calculateTotals();
+        const d = getDateParts();
+        const company = document.querySelector('input[name="company"]:checked').value;
+        const docType = document.getElementById('documentType').value;
+        const depositPercent = normalizePercent(document.getElementById('depositPercent').value);
+        const depositNumber = parseFloat(depositPercent.replace('%','').replace(',','.')) || 80;
+        const manualDeposit = document.getElementById('depositAmountText').value.trim();
+        const rawProducts = JSON.parse(getProducts());
+        const products = rawProducts.map((p, i) => {
+            const qty = Number(p.qty || 0), price = Number(p.price || 0), discount = Number(p.discount || 0);
+            const subtotal = qty * price * (1 - discount/100);
+            return {
+                stt: i+1, name: p.name || '', size: p.size || '', nameWithSize: [p.name,p.size].filter(Boolean).join(' '),
+                unit: p.unit || '', qty: p.qty || '', priceFormatted: formatMoney(price),
+                subtotalFormatted: formatMoney(subtotal), discountText: discount ? `${discount}%` : '0%', note: p.note || ''
+            };
+        });
+        if (docType === 'BBCC') refreshCommitmentParagraph(false);
+        return {
+            company, docType,
+            contractNo: document.getElementById('contractNo').value,
+            orderNo: `01/${document.getElementById('partnerShortName').value.toUpperCase() || '[ĐỐI-TÁC]'}-${company === 'SPACK' ? 'SP' : 'SWIFT'}`,
+            partnerShortName: document.getElementById('partnerShortName').value.toUpperCase(),
+            contractDateText: `ngày ${d.day} tháng ${d.month} năm ${d.year}`,
+            poDateLine: `Hà Nội, Ngày ${d.day} tháng ${d.month} năm ${d.year}`,
+            buyerCompany: document.getElementById('buyerCompany').value, buyerRep: document.getElementById('buyerRep').value,
+            buyerRole: document.getElementById('buyerRole').value, buyerAddress: document.getElementById('buyerAddress').value,
+            buyerTaxCode: document.getElementById('buyerTaxCode').value, buyerPhone: document.getElementById('buyerPhone').value,
+            buyerAccount: document.getElementById('buyerAccount').value, buyerBank: document.getElementById('buyerBank').value,
+            refContractNo: document.getElementById('refContractNo').value || '', annualVolume: document.getElementById('annualVolume').value || '',
+            camKetBagQty: document.getElementById('camKetBagQty').value || '', productionTime: document.getElementById('productionTime').value || '',
+            deliveryTime: document.getElementById('deliveryTime').value || '', shippingCostClause: document.getElementById('shippingCostClause').value || '',
+            paymentStage1Text: document.getElementById('paymentStage1Text').value || '', paymentStage2Text: document.getElementById('paymentStage2Text').value || '',
+            stockNoticeTime: document.getElementById('stockNoticeTime').value || '', depositPercent,
+            depositAmountText: manualDeposit || `${formatMoney(totals.subtotal * depositNumber / 100)} VNĐ`,
+            afterDeliveryPayment: document.getElementById('afterDeliveryPayment').value || '', freightNote: document.getElementById('freightNote').value || '',
+            deliveryAddress: document.getElementById('deliveryAddress').value || '', deliveryDate: document.getElementById('deliveryDate').value || '',
+            vatRate: document.getElementById('vatRate').value, subtotalFormatted: formatMoney(totals.subtotal), vatTotalFormatted: formatMoney(totals.vat),
+            grandTotalFormatted: formatMoney(totals.grand), amountInWords: totals.words, products,
+            commitmentParagraph: document.getElementById('commitmentParagraph').value || ''
+        };
+    }
+
+    async function generateFromTemplate(forceDocType = null) {
+        try {
+            const company = document.querySelector('input[name="company"]:checked').value;
+            const selected = document.getElementById('documentType').value;
+            const docType = forceDocType || selected;
+            const url = templateMap[company]?.[docType];
+            if (!url) { showToast('Chưa có file Word mẫu cho lựa chọn này.', true); return; }
+            if (!window.docxtemplater || !window.PizZip || !window.saveAs) {
+                showToast('Không tải được thư viện tạo Word. Hãy kiểm tra kết nối Internet.', true); return;
+            }
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Không tải được template: ${response.status}`);
+            const content = await response.arrayBuffer();
+            const zip = new PizZip(content);
+            const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true, nullGetter: () => '' });
+            const data = getTemplateData();
+            // Nút tím Xuất PO: nếu đang ở HĐNT/HĐMB, tự lấy số hợp đồng hiện tại làm hợp đồng đính kèm.
+            if (forceDocType === 'DDH' && selected !== 'DDH') data.refContractNo = data.contractNo;
+            data.docType = docType;
+            doc.render(data);
+            const safeNo = (docType === 'DDH' ? data.orderNo : data.contractNo).replace(/[/\?%*:|"<>]/g, '_');
+            saveAs(doc.toBlob(), `${company}_${docType}_${safeNo}.docx`);
+            showToast('Đã tạo file Word từ đúng mẫu gốc!');
+        } catch (error) {
+            console.error(error);
+            const detail = error?.properties?.errors?.map(e => e.properties?.explanation).filter(Boolean).join(' | ');
+            showToast('Lỗi tạo Word: ' + (detail || error.message || error), true);
+        }
+    }
+
+    document.getElementById('exportWordBtn').addEventListener('click', () => generateFromTemplate());
+    document.getElementById('exportPoBtn').addEventListener('click', () => generateFromTemplate('DDH'));
+
+    // --- Local storage (GitHub Pages compatible) ---
+    // GitHub Pages chỉ chạy frontend, vì vậy dữ liệu được lưu trong trình duyệt này.
+    function getSavedRecords() {
+        return JSON.parse(localStorage.getItem('contract_records') || '[]');
+    }
+    function saveRecord(record) {
+        const records = getSavedRecords();
+        records.push({ ...record, saved_at: new Date().toISOString() });
+        localStorage.setItem('contract_records', JSON.stringify(records));
+    }
+
+    document.getElementById('contractForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
+
+        const record = {
+            company: document.querySelector('input[name="company"]:checked').value,
+            document_type: document.getElementById('documentType').value,
+            contract_no: document.getElementById('contractNo').value,
+            created_date: document.getElementById('createdDate').value,
+            ref_contract_no: document.getElementById('refContractNo').value || '',
+            buyer_company: document.getElementById('buyerCompany').value,
+            buyer_rep: document.getElementById('buyerRep').value,
+            buyer_role: document.getElementById('buyerRole').value,
+            buyer_address: document.getElementById('buyerAddress').value,
+            buyer_tax_code: document.getElementById('buyerTaxCode').value,
+            buyer_phone: document.getElementById('buyerPhone').value,
+            buyer_account: document.getElementById('buyerAccount').value,
+            buyer_bank: document.getElementById('buyerBank').value,
+            print_type: document.getElementById('printType').value,
+            vat_rate: document.getElementById('vatRate').value,
+            annual_volume: document.getElementById('annualVolume').value || '',
+            commit_type: document.getElementById('commitType').value || '',
+            cam_ket_bag_qty: document.getElementById('camKetBagQty').value || '',
+            deposit_percent: document.getElementById('depositPercent').value || '',
+            delivery_address: document.getElementById('deliveryAddress').value || '',
+            delivery_date: document.getElementById('deliveryDate').value || '',
+            production_time: document.getElementById('productionTime').value || '',
+            delivery_time: document.getElementById('deliveryTime').value || '',
+            shipping_cost_clause: document.getElementById('shippingCostClause').value || '',
+            payment_stage_1: document.getElementById('paymentStage1Text').value || '',
+            payment_stage_2: document.getElementById('paymentStage2Text').value || '',
+            stock_notice_time: document.getElementById('stockNoticeTime').value || '',
+            deposit_amount_text: document.getElementById('depositAmountText').value || '',
+            after_delivery_payment: document.getElementById('afterDeliveryPayment').value || '',
+            freight_note: document.getElementById('freightNote').value || '',
+            commitment_paragraph: document.getElementById('commitmentParagraph').value || '',
+            products_json: getProducts(),
+            subtotal: String(calculateTotals().subtotal),
+            vat_amount: String(calculateTotals().vat),
+            grand_total: String(calculateTotals().grand),
+            amount_in_words: calculateTotals().words
+        };
+
+        try {
+            saveRecord(record);
+            showToast('Đã lưu thông tin thành công vào máy này!');
+            e.target.reset();
+            document.getElementById('createdDate').valueAsDate = new Date();
+            handleFormChange();
+            calculateTotals();
+        } catch (error) {
+            console.error(error);
+            showToast('Lỗi! Không thể lưu dữ liệu.', true);
+        } finally {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        }
+    });
+
+    // Init
+    refreshCompanyDropdown();
+    refreshPresetDropdown();
+    handleFormChange();
+    calculateTotals();
+</script>
+ </body>
+</html>
