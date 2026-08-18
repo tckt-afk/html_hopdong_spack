@@ -44,8 +44,6 @@
     #exportWordBtn:hover { background: #1d4ed8; }
     #exportPoBtn { background: #7c3aed; }
     #exportPoBtn:hover { background: #6d28d9; }
-    #submitBtn { background: #16a34a; }
-    #submitBtn:hover { background: #15803d; }
     .canva-text { color: #075eaf; }
     .canva-section { background: #f8fbff; }
     input, select, button, textarea { font-family: inherit; }
@@ -76,8 +74,12 @@
  <body class="min-h-screen p-4 md:p-8">
   <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
    <h1 class="canva-text text-center font-bold text-xl md:text-2xl uppercase mb-6">TẠO THÔNG TIN HỢP ĐỒNG</h1>
-   <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex flex-wrap items-center gap-3">
-    <label for="presetSelect" class="text-sm font-bold text-blue-900 whitespace-nowrap">📁 Tải đơn mẫu:</label> <select id="presetSelect" class="flex-1 min-w-[200px] p-2 border border-gray-300 rounded-md text-sm"><option value="">-- Chọn đơn hàng mẫu đã lưu --</option></select> <input type="text" id="presetNameInput" placeholder="Tên đơn mẫu (VD: Mẫu Túi Cam - Cty ABC)" class="flex-1 min-w-[220px] p-2 border border-gray-300 rounded-md text-sm"> <button type="button" id="btnSavePreset" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-bold">💾 Lưu Đơn Mẫu</button> <button type="button" id="btnDeletePreset" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-md text-sm font-bold">🗑️ Xóa</button>
+   <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex flex-wrap items-end gap-3">
+    <div class="flex-1 min-w-[260px]">
+     <label for="presetSelect" class="block text-sm font-bold text-blue-900 mb-1">📁 Tải mẫu đơn đã lưu</label>
+     <select id="presetSelect" class="w-full p-2.5 border border-blue-200 rounded-md text-sm bg-white"><option value="">-- Chọn mẫu đơn đã lưu --</option></select>
+    </div>
+    <button type="button" id="btnLoadPreset" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-md text-sm font-bold">📂 Tải mẫu đã chọn</button>
    </div>
    <div id="toast" class="toast bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg font-medium">
     Dữ liệu đã được lưu thành công!
@@ -202,7 +204,16 @@
       </div>
      </div>
     </div>
-    <div class="flex flex-col md:flex-row gap-3 mt-8"><button type="button" id="exportWordBtn" class="canva-button flex-1 py-4 rounded-lg text-white font-bold text-lg uppercase">📄 Xuất Word</button> <button type="button" id="exportPoBtn" class="canva-button flex-1 py-4 rounded-lg text-white font-bold text-lg uppercase">📦 Xuất PO</button> <button type="submit" id="submitBtn" class="canva-button flex-1 py-4 rounded-lg text-white font-bold text-lg uppercase">💾 Lưu thông tin</button>
+    <div class="mt-8 rounded-xl border border-blue-200 bg-blue-50 p-4">
+     <div class="font-bold text-blue-900 mb-1">💾 Lưu mẫu đơn hiện tại</div>
+     <p class="text-sm text-gray-600 mb-3">Lưu toàn bộ thông tin đang nhập, bao gồm cả “Căn cứ theo HĐ / Đơn hàng số”, để lần sau tải lại và tiếp tục chỉnh sửa.</p>
+     <div class="flex flex-col md:flex-row gap-3">
+      <input type="text" id="presetNameInput" placeholder="Tên mẫu (VD: GULU - HĐMB tháng 8/2026)" class="flex-1 p-2.5 border border-blue-200 rounded-md bg-white">
+      <button type="button" id="btnSavePreset" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-md font-bold">💾 Lưu mẫu đơn</button>
+      <button type="button" id="btnDeletePreset" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2.5 rounded-md font-bold">🗑️ Xóa mẫu đang chọn</button>
+     </div>
+    </div>
+    <div class="flex flex-col md:flex-row gap-3 mt-4"><button type="button" id="exportWordBtn" class="canva-button flex-1 py-4 rounded-lg text-white font-bold text-lg uppercase">📄 Xuất Word</button> <button type="button" id="exportPoBtn" class="canva-button flex-1 py-4 rounded-lg text-white font-bold text-lg uppercase">📦 Xuất PO</button>
     </div>
    </form>
   </div>
@@ -494,38 +505,124 @@
             const option = document.createElement('option'); option.value = name; option.textContent = name; select.appendChild(option);
         });
     }
+    function getValue(id) { return document.getElementById(id)?.value ?? ''; }
+    function setValue(id, value) { const el = document.getElementById(id); if (el) el.value = value ?? ''; }
+
     function collectPreset() {
+        calculateTotals();
         return {
-            buyerCompany: document.getElementById('buyerCompany').value,
-            vatRate: document.getElementById('vatRate').value,
+            company: document.querySelector('input[name="company"]:checked')?.value || 'SPACK',
+            documentType: getValue('documentType'),
+            partnerShortName: getValue('partnerShortName'),
+            createdDate: getValue('createdDate'),
+            refContractNo: getValue('refContractNo'),
+            buyerCompany: getValue('buyerCompany'),
+            buyerRep: getValue('buyerRep'),
+            buyerRole: getValue('buyerRole'),
+            buyerAddress: getValue('buyerAddress'),
+            buyerTaxCode: getValue('buyerTaxCode'),
+            buyerPhone: getValue('buyerPhone'),
+            buyerAccount: getValue('buyerAccount'),
+            buyerBank: getValue('buyerBank'),
+            annualVolume: getValue('annualVolume'),
+            commitType: getValue('commitType'),
+            printType: getValue('printType'),
+            vatRate: getValue('vatRate'),
+            depositPercent: getValue('depositPercent'),
+            deliveryAddress: getValue('deliveryAddress'),
+            deliveryDate: getValue('deliveryDate'),
+            productionTime: getValue('productionTime'),
+            deliveryTime: getValue('deliveryTime'),
+            shippingCostClause: getValue('shippingCostClause'),
+            paymentStage1Text: getValue('paymentStage1Text'),
+            paymentStage2Text: getValue('paymentStage2Text'),
+            stockNoticeTime: getValue('stockNoticeTime'),
+            depositAmountText: getValue('depositAmountText'),
+            afterDeliveryPayment: getValue('afterDeliveryPayment'),
+            freightNote: getValue('freightNote'),
+            commitmentParagraph: getValue('commitmentParagraph'),
             products: [...document.querySelectorAll('#productBody tr')].map(row => ({
-                name: row.querySelector('[name="prodName[]"]').value, size: row.querySelector('[name="prodSize[]"]').value,
-                unit: row.querySelector('[name="prodUnit[]"]').value, qty: row.querySelector('[name="prodQty[]"]').value,
-                price: row.querySelector('[name="prodPrice[]"]').value, discount: row.querySelector('[name="prodDiscount[]"]').value, note: row.querySelector('[name="prodNote[]"]')?.value || ''
-            }))
+                name: row.querySelector('[name="prodName[]"]')?.value || '',
+                size: row.querySelector('[name="prodSize[]"]')?.value || '',
+                unit: row.querySelector('[name="prodUnit[]"]')?.value || '',
+                qty: row.querySelector('[name="prodQty[]"]')?.value || '',
+                price: row.querySelector('[name="prodPrice[]"]')?.value || '',
+                discount: row.querySelector('[name="prodDiscount[]"]')?.value || '0',
+                note: row.querySelector('[name="prodNote[]"]')?.value || ''
+            })),
+            savedAt: new Date().toISOString()
         };
     }
+
     function loadPreset() {
-        const name = document.getElementById('presetSelect').value, data = getSavedPresets()[name]; if (!data) return;
-        document.getElementById('buyerCompany').value = data.buyerCompany || '';
-        document.getElementById('vatRate').value = data.vatRate || '8';
+        const name = document.getElementById('presetSelect').value;
+        const data = getSavedPresets()[name];
+        if (!name || !data) { showToast('Vui lòng chọn mẫu đơn cần tải!', true); return; }
+
+        const companyRadio = document.querySelector(`input[name="company"][value="${data.company || 'SPACK'}"]`);
+        if (companyRadio) companyRadio.checked = true;
+        setValue('documentType', data.documentType || 'HDNT');
+        handleFormChange();
+
+        setValue('partnerShortName', data.partnerShortName);
+        setValue('createdDate', data.createdDate || new Date().toISOString().slice(0,10));
+        setValue('refContractNo', data.refContractNo);
+        setValue('buyerCompany', data.buyerCompany);
+        setValue('buyerRep', data.buyerRep);
+        setValue('buyerRole', data.buyerRole);
+        setValue('buyerAddress', data.buyerAddress);
+        setValue('buyerTaxCode', data.buyerTaxCode);
+        setValue('buyerPhone', data.buyerPhone);
+        setValue('buyerAccount', data.buyerAccount);
+        setValue('buyerBank', data.buyerBank);
+        setValue('annualVolume', data.annualVolume);
+        setValue('commitType', data.commitType || 'TH1');
+        setValue('printType', data.printType || 'no_print');
+        setValue('vatRate', data.vatRate || '8');
+        setValue('depositPercent', data.depositPercent);
+        setValue('deliveryAddress', data.deliveryAddress);
+        setValue('deliveryDate', data.deliveryDate);
+        setValue('productionTime', data.productionTime);
+        setValue('deliveryTime', data.deliveryTime);
+        setValue('shippingCostClause', data.shippingCostClause);
+        setValue('paymentStage1Text', data.paymentStage1Text);
+        setValue('paymentStage2Text', data.paymentStage2Text);
+        setValue('stockNoticeTime', data.stockNoticeTime);
+        setValue('depositAmountText', data.depositAmountText);
+        setValue('afterDeliveryPayment', data.afterDeliveryPayment);
+        setValue('freightNote', data.freightNote);
+        setValue('commitmentParagraph', data.commitmentParagraph);
+
         document.getElementById('productBody').innerHTML = '';
-        (data.products || []).forEach(product => addRow(product));
-        calculateTotals(); showToast(`Đã tải đơn mẫu "${name}".`);
+        const products = data.products?.length ? data.products : [{}];
+        products.forEach(product => addRow(product));
+        generateContractNo();
+        handleCommitTypeChange();
+        calculateTotals();
+        showToast(`Đã tải đầy đủ mẫu "${name}".`);
     }
-    document.getElementById('presetSelect').addEventListener('change', loadPreset);
+
+    document.getElementById('btnLoadPreset').addEventListener('click', loadPreset);
+    document.getElementById('presetSelect').addEventListener('dblclick', loadPreset);
     document.getElementById('btnSavePreset').addEventListener('click', () => {
         const name = document.getElementById('presetNameInput').value.trim();
-        if (!name) { showToast('Vui lòng nhập tên đơn mẫu!', true); return; }
-        const presets = getSavedPresets(); presets[name] = collectPreset();
+        if (!name) { showToast('Vui lòng nhập tên mẫu đơn!', true); return; }
+        const presets = getSavedPresets();
+        presets[name] = collectPreset();
         localStorage.setItem('order_presets', JSON.stringify(presets));
-        document.getElementById('presetNameInput').value = ''; refreshPresetDropdown(); showToast(`Đã lưu đơn mẫu "${name}".`);
+        refreshPresetDropdown();
+        document.getElementById('presetSelect').value = name;
+        document.getElementById('presetNameInput').value = '';
+        showToast(`Đã lưu toàn bộ mẫu "${name}", gồm cả căn cứ HĐ/Đơn hàng.`);
     });
     document.getElementById('btnDeletePreset').addEventListener('click', () => {
         const select = document.getElementById('presetSelect'), name = select.value;
-        if (!name) { showToast('Vui lòng chọn đơn mẫu cần xóa!', true); return; }
-        const presets = getSavedPresets(); delete presets[name]; localStorage.setItem('order_presets', JSON.stringify(presets));
-        refreshPresetDropdown(); showToast(`Đã xóa đơn mẫu "${name}".`);
+        if (!name) { showToast('Vui lòng chọn mẫu cần xóa ở phía trên!', true); return; }
+        const presets = getSavedPresets();
+        delete presets[name];
+        localStorage.setItem('order_presets', JSON.stringify(presets));
+        refreshPresetDropdown();
+        showToast(`Đã xóa mẫu "${name}".`);
     });
 
     // --- Word export from the original DOCX templates ---
@@ -629,77 +726,6 @@
 
     document.getElementById('exportWordBtn').addEventListener('click', () => generateFromTemplate());
     document.getElementById('exportPoBtn').addEventListener('click', () => generateFromTemplate('DDH'));
-
-    // --- Local storage (GitHub Pages compatible) ---
-    // GitHub Pages chỉ chạy frontend, vì vậy dữ liệu được lưu trong trình duyệt này.
-    function getSavedRecords() {
-        return JSON.parse(localStorage.getItem('contract_records') || '[]');
-    }
-    function saveRecord(record) {
-        const records = getSavedRecords();
-        records.push({ ...record, saved_at: new Date().toISOString() });
-        localStorage.setItem('contract_records', JSON.stringify(records));
-    }
-
-    document.getElementById('contractForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.style.opacity = '0.6';
-
-        const record = {
-            company: document.querySelector('input[name="company"]:checked').value,
-            document_type: document.getElementById('documentType').value,
-            contract_no: document.getElementById('contractNo').value,
-            created_date: document.getElementById('createdDate').value,
-            ref_contract_no: document.getElementById('refContractNo').value || '',
-            buyer_company: document.getElementById('buyerCompany').value,
-            buyer_rep: document.getElementById('buyerRep').value,
-            buyer_role: document.getElementById('buyerRole').value,
-            buyer_address: document.getElementById('buyerAddress').value,
-            buyer_tax_code: document.getElementById('buyerTaxCode').value,
-            buyer_phone: document.getElementById('buyerPhone').value,
-            buyer_account: document.getElementById('buyerAccount').value,
-            buyer_bank: document.getElementById('buyerBank').value,
-            print_type: document.getElementById('printType').value,
-            vat_rate: document.getElementById('vatRate').value,
-            annual_volume: document.getElementById('annualVolume').value || '',
-            commit_type: document.getElementById('commitType').value || '',
-            deposit_percent: document.getElementById('depositPercent').value || '',
-            delivery_address: document.getElementById('deliveryAddress').value || '',
-            delivery_date: document.getElementById('deliveryDate').value || '',
-            production_time: document.getElementById('productionTime').value || '',
-            delivery_time: document.getElementById('deliveryTime').value || '',
-            shipping_cost_clause: document.getElementById('shippingCostClause').value || '',
-            payment_stage_1: document.getElementById('paymentStage1Text').value || '',
-            payment_stage_2: document.getElementById('paymentStage2Text').value || '',
-            stock_notice_time: document.getElementById('stockNoticeTime').value || '',
-            deposit_amount_text: document.getElementById('depositAmountText').value || '',
-            after_delivery_payment: document.getElementById('afterDeliveryPayment').value || '',
-            freight_note: document.getElementById('freightNote').value || '',
-            commitment_paragraph: document.getElementById('commitmentParagraph').value || '',
-            products_json: getProducts(),
-            subtotal: String(calculateTotals().subtotal),
-            vat_amount: String(calculateTotals().vat),
-            grand_total: String(calculateTotals().grand),
-            amount_in_words: calculateTotals().words
-        };
-
-        try {
-            saveRecord(record);
-            showToast('Đã lưu thông tin thành công vào máy này!');
-            e.target.reset();
-            document.getElementById('createdDate').valueAsDate = new Date();
-            handleFormChange();
-            calculateTotals();
-        } catch (error) {
-            console.error(error);
-            showToast('Lỗi! Không thể lưu dữ liệu.', true);
-        } finally {
-            btn.disabled = false;
-            btn.style.opacity = '1';
-        }
-    });
 
     // Init
     refreshCompanyDropdown();
