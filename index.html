@@ -130,9 +130,7 @@
      </div>
      <div class="flex flex-col cfield field-m01 md:col-span-2"><label for="commitType" class="text-sm font-semibold text-gray-600 mb-1">Phương thức Cam kết Thuế BVMT *</label> <select id="commitType" name="commitType" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100"> <option value="TH1">TH1: Ký 1 biên bản cam kết cho dự kiến cả năm</option> <option value="TH2">TH2: Ký biên bản cam kết riêng cho từng đơn hàng</option> </select>
      </div>
-     <div class="flex flex-col cfield field-payment"><label for="printType" class="text-sm font-semibold text-gray-600 mb-1">Hình thức In ấn *</label> <select id="printType" name="printType" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100"> <option value="no_print">Không in (TT 100% trước xuất kho)</option> <option value="printed">In Công Nghiệp (Cọc 80%)</option> </select>
-     </div>
-     <div class="flex flex-col cfield field-payment"><label for="vatRate" class="text-sm font-semibold text-gray-600 mb-1">Thuế VAT *</label> <select id="vatRate" name="vatRate" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100"> <option value="8">8%</option> <option value="10">10%</option> <option value="0">0%</option> </select>
+<div class="flex flex-col cfield field-payment"><label for="vatRate" class="text-sm font-semibold text-gray-600 mb-1">Thuế VAT *</label> <select id="vatRate" name="vatRate" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100"> <option value="8">8%</option> <option value="10">10%</option> <option value="0">0%</option> </select>
      </div>
      <div class="flex flex-col cfield field-deposit"><label for="depositPercent" class="text-sm font-semibold text-gray-600 mb-1">Tỷ lệ đặt cọc Lần 1</label> <input type="text" id="depositPercent" name="depositPercent" placeholder="VD: 80% giá trị HĐ" class="p-2.5 border border-gray-300 rounded-md focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
      </div>
@@ -183,7 +181,7 @@
          <td class="border border-gray-300 p-1"><input type="text" name="prodSize[]" placeholder="28*42" class="w-full p-1.5 border-0 focus:ring-0"></td>
          <td class="border border-gray-300 p-1"><input type="text" name="prodUnit[]" value="Cuộn" class="w-full p-1.5 border-0 focus:ring-0"></td>
          <td class="border border-gray-300 p-1"><input type="number" name="prodQty[]" required class="w-full p-1.5 border-0 focus:ring-0"></td>
-         <td class="border border-gray-300 p-1 col-price"><input type="number" name="prodPrice[]" class="w-full p-1.5 border-0 focus:ring-0"></td>
+         <td class="border border-gray-300 p-1 col-price"><input type="number" step="any" name="prodPrice[]" class="w-full p-1.5 border-0 focus:ring-0"></td>
          <td class="border border-gray-300 p-1 col-price"><input type="number" name="prodDiscount[]" value="0" class="w-full p-1.5 border-0 focus:ring-0"></td>
          <td class="border border-gray-300 p-1 col-price"><input type="text" name="prodSubtotal[]" readonly value="0" class="w-full p-1.5 border-0 bg-gray-100 text-right font-semibold"></td>
          <td class="border border-gray-300 p-1"><input type="text" name="prodNote[]" class="w-full p-1.5 border-0 focus:ring-0"></td>
@@ -225,11 +223,13 @@
         const company = document.querySelector('input[name="company"]:checked').value;
         const docType = document.getElementById('documentType').value;
         const partner = document.getElementById('partnerShortName').value.toUpperCase() || '[ĐỐI-TÁC]';
-        const year = new Date().getFullYear();
+        const d = getDateParts();
+        const month = String(d.month).padStart(2, '0');
+        const year = d.year;
         const sellerCode = company === 'SPACK' ? 'SP' : 'SWIFT';
         let code = '';
-        if (docType === 'HDNT') code = `${company === 'SPACK' ? '05' : '08'}/${year}/HĐNT/${partner}-${sellerCode}`;
-        else if (docType === 'HDMB') code = `01/${year}/HĐMB/${partner}-${sellerCode}`;
+        if (docType === 'HDNT') code = `${month}/${year}/HĐNT/${partner}-${sellerCode}`;
+        else if (docType === 'HDMB') code = `${month}/${year}/HĐMB/${partner}-${sellerCode}`;
         else if (docType === 'DDH') code = `01/${partner}-${sellerCode}`;
         else if (docType === 'BBBG') code = `BBGN/${partner}-${sellerCode}`;
         else if (docType === 'BBCC') code = `BBCC/${partner}-${sellerCode}`;
@@ -340,13 +340,22 @@
     document.getElementById('commitType').addEventListener('change', handleFormChange);
     document.querySelectorAll('input[name="company"]').forEach(r => r.addEventListener('change', handleFormChange));
     ['refContractNo','createdDate'].forEach(id => document.getElementById(id).addEventListener('change', () => {
+        if (id === 'createdDate') generateContractNo();
         if (document.getElementById('documentType').value === 'BBCC' && !document.getElementById('commitmentParagraph').dataset.manual) refreshCommitmentParagraph(true);
     }));
     document.getElementById('commitmentParagraph').addEventListener('input', function(){ this.dataset.manual='1'; });
 
 
     // --- Automatic totals and Vietnamese number words ---
-    function formatMoney(value) { return new Intl.NumberFormat('vi-VN').format(Math.round(value)); }
+    function formatMoney(value) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return '0';
+        return new Intl.NumberFormat('en-US', {
+            useGrouping: true,
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 20
+        }).format(n);
+    }
     const numberWords = ['không','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
     function readThreeDigits(n, full) {
         const h = Math.floor(n / 100), t = Math.floor((n % 100) / 10), u = n % 10; let s = '';
@@ -356,10 +365,12 @@
         return s;
     }
     function docSoTiengViet(value) {
-        value = Math.round(value); if (!value) return 'Không đồng';
-        const units = ['', ' nghìn', ' triệu', ' tỷ']; let n = value, parts = [], i = 0;
+        const integerValue = Math.trunc(Number(value) || 0);
+        if (!integerValue) return 'Không đồng';
+        const units = ['', ' nghìn', ' triệu', ' tỷ']; let n = integerValue, parts = [], i = 0;
         while (n > 0) { const block = n % 1000; if (block) parts.unshift(readThreeDigits(block, n >= 1000) + units[i]); n = Math.floor(n / 1000); i++; }
-        return parts.join(' ').replace(/^./, c => c.toUpperCase()) + ' đồng chẵn';
+        const words = parts.join(' ').trim().replace(/\s+/g, ' ');
+        return words.charAt(0).toUpperCase() + words.slice(1) + ' đồng chẵn';
     }
     function calculateTotals() {
         let subtotal = 0;
@@ -371,12 +382,12 @@
             const output = row.querySelector('[name="prodSubtotal[]"]'); if (output) output.value = formatMoney(amount);
         });
         const vat = subtotal * ((parseFloat(document.getElementById('vatRate').value) || 0) / 100);
-        const grand = Math.round(subtotal + vat);
+        const grand = subtotal + vat;
         document.getElementById('lblSubTotal').textContent = formatMoney(subtotal) + ' VNĐ';
         document.getElementById('lblVatTotal').textContent = formatMoney(vat) + ' VNĐ';
         document.getElementById('lblGrandTotal').textContent = formatMoney(grand) + ' VNĐ';
         document.getElementById('lblAmountInWords').textContent = docSoTiengViet(grand) + './.';
-        return { subtotal: Math.round(subtotal), vat: Math.round(vat), grand, words: docSoTiengViet(grand) + './.' };
+        return { subtotal, vat, grand, words: docSoTiengViet(grand) + './.' };
     }
     document.getElementById('productBody').addEventListener('input', calculateTotals);
     document.getElementById('vatRate').addEventListener('change', calculateTotals);
@@ -391,7 +402,7 @@
             <td class="border border-gray-300 p-1"><input type="text" name="prodSize[]" placeholder="28*42" class="w-full p-1.5 border-0 focus:ring-0"></td>
             <td class="border border-gray-300 p-1"><input type="text" name="prodUnit[]" value="Cuộn" class="w-full p-1.5 border-0 focus:ring-0"></td>
             <td class="border border-gray-300 p-1"><input type="number" name="prodQty[]" required class="w-full p-1.5 border-0 focus:ring-0"></td>
-            <td class="border border-gray-300 p-1 col-price" ${hidePrice}><input type="number" name="prodPrice[]" class="w-full p-1.5 border-0 focus:ring-0"></td>
+            <td class="border border-gray-300 p-1 col-price" ${hidePrice}><input type="number" step="any" name="prodPrice[]" class="w-full p-1.5 border-0 focus:ring-0"></td>
             <td class="border border-gray-300 p-1 col-price" ${hidePrice}><input type="number" name="prodDiscount[]" value="0" class="w-full p-1.5 border-0 focus:ring-0"></td>
             <td class="border border-gray-300 p-1 col-price" ${hidePrice}><input type="text" name="prodSubtotal[]" readonly value="0" class="w-full p-1.5 border-0 bg-gray-100 text-right font-semibold"></td>
             <td class="border border-gray-300 p-1"><input type="text" name="prodNote[]" class="w-full p-1.5 border-0 focus:ring-0"></td>
@@ -526,7 +537,6 @@
             buyerBank: getValue('buyerBank'),
             annualVolume: getValue('annualVolume'),
             commitType: getValue('commitType'),
-            printType: getValue('printType'),
             vatRate: getValue('vatRate'),
             depositPercent: getValue('depositPercent'),
             deliveryAddress: getValue('deliveryAddress'),
@@ -577,7 +587,6 @@
         setValue('buyerBank', data.buyerBank);
         setValue('annualVolume', data.annualVolume);
         setValue('commitType', data.commitType || 'TH1');
-        setValue('printType', data.printType || 'no_print');
         setValue('vatRate', data.vatRate || '8');
         setValue('depositPercent', data.depositPercent);
         setValue('deliveryAddress', data.deliveryAddress);
